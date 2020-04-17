@@ -378,6 +378,18 @@ class StatefulDictStateMachine(RuleBasedStateMachine):
 TestStatefulDict = StatefulDictStateMachine.TestCase
 ```
 
+```bash
+$ pytest -s -k TestStateful --hypothesis-show-statistics
+... lots of output
+  - Events:
+    ...
+    *  55.80%, Inserting key
+    *  50.72%, Searching non-existing key
+    *  31.16%, Deleting key
+    ...
+    *  17.39%, Searching existing key
+```
+
 ### Conclusion
 
 - Positive vs. negative testing
