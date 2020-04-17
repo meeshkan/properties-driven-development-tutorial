@@ -59,5 +59,11 @@ class SortedDict:
     def walk(self, func):
         tree.walk(self._tree, func)
 
+    def min(self):
+        return tree.minimum(self._tree)
+
+    def max(self):
+        return tree.maximum(self._tree)
+
 
 __all__ = ["SortedDict"]

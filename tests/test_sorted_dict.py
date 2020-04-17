@@ -2,11 +2,10 @@ from sorted_dict import SortedDict
 from hypothesis import given, assume
 from hypothesis.stateful import RuleBasedStateMachine, rule, Bundle, consumes, invariant
 import hypothesis.strategies as some
-import itertools
 import pytest
 
 
-def some_key_values():
+def some_key_value_tuples():
     """Generator for lists of key-value tuples.
     """
     some_keys = some.integers()
@@ -15,44 +14,28 @@ def some_key_values():
     return some.lists(some_kvs)
 
 
-def dedupe(key_value_pairs):
-    """Remove duplicate keys by always picking the last. Also sorts the array by key.
-    
-    >>> dedupe([(0, 0), (0, 1), (1, 2), (0, 2)])
-    [(0, 2), (1, 2)]
-    
-    """
-    as_sorted = sorted(key_value_pairs, key=lambda pair: pair[0])
-    grouped = itertools.groupby(as_sorted, lambda pair: pair[0])
-
-    deduped = []
-    for _, same_key in grouped:
-        last = None
-        for key_val in same_key:
-            last = key_val
-        deduped.append(last)
-    return deduped
-
-
 @some.composite
 def some_sorted_dicts(draw):
     """Generator of sorted dicts along with the dictionary of
     key-value pairs used for constructing it."""
-    key_values = draw(some_key_values())
+    key_values = draw(some_key_value_tuples())
 
-    tree = SortedDict()
+    sorted_dict = SortedDict()
     for key, val in key_values:
-        tree[key] = val
+        sorted_dict[key] = val
 
+    # Put the keys you expect to find in sorted_dict
+    # in a dictionary for comparison.
     expected = {}
     for key, val in key_values:
         expected[key] = val
 
-    return tree, expected
+    return sorted_dict, expected
 
 
 @given(dict_and_values=some_sorted_dicts())
 def test_insert_and_search(dict_and_values):
+    """Key-value pairs added to sorted dictionary can be searched."""
     sorted_dict, expected = dict_and_values
 
     for key, value in expected.items():
@@ -62,9 +45,17 @@ def test_insert_and_search(dict_and_values):
         )
 
 
+@given(dict_and_values=some_sorted_dicts())
+def test_keys_sorted(dict_and_values):
+    """Invariant: keys in sorted dictionary are sorted."""
+    sorted_dict, _ = dict_and_values
+    keys = sorted_dict.keys()
+    assert keys == sorted(keys)
+
+
 @given(dict_and_values=some_sorted_dicts(), data=some.data())
 def test_search_nonexisting(dict_and_values, data):
-    """Test drawing a key not in dictionary."""
+    """Searching a key not added to sorted dictionary raises KeyError."""
     sorted_dict, expected = dict_and_values
     inserted_keys = list(expected.keys())
     new_key = data.draw(some.integers())
@@ -79,13 +70,26 @@ def test_search_nonexisting(dict_and_values, data):
     data=some.data(),
 )
 def test_search_after_delete(dict_and_values, data):
-    """Test drawing a key not in dictionary."""
+    """Searching a key after deleting the key raises KeyError."""
     sorted_dict, expected = dict_and_values
     inserted_keys = list(expected.keys())
     key_to_delete = data.draw(some.sampled_from(inserted_keys), label="Key to delete")
     del sorted_dict[key_to_delete]
     with pytest.raises(KeyError):  # type: ignore
         sorted_dict[key_to_delete]
+
+
+@given(
+    dict_and_expected=some_sorted_dicts().filter(lambda drawn: len(drawn[1].keys()) > 0)
+)
+def test_minimum(dict_and_expected):
+    """Minimum key in the sorted dictionary is the smallest inserted key."""
+    sorted_dict, expected = dict_and_expected
+
+    minimum_key = sorted_dict.min()
+    expected_minimum_key = min(expected.keys())
+
+    assert minimum_key == expected_minimum_key
 
 
 class StatefulDictStateMachine(RuleBasedStateMachine):
