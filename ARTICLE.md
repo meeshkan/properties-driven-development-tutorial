@@ -392,4 +392,12 @@ $ pytest -s -k TestStateful --hypothesis-show-statistics
 
 ### Conclusion
 
+- Turn examples into properties
+- Turn properties into property-based tests
 - Positive vs. negative testing
+
+### Resources
+
+- [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/): Excellent book on property-based testing with a chapter on properties-driven development
+- [From 1 to 10,000 test cases in under an hour: A beginner's guide to property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8): Guide to PBT from my colleagues Carolyn and Fredrik
+- [Hypothesis Quick Start guide](https://hypothesis.readthedocs.io/en/latest/quickstart.html): Get started with property-based testing with Hypothesis
