@@ -13,7 +13,7 @@ tags:
 
 > _This article was edited by [Carolyn Stransky](https://dev.to/carolstran). XXX and XXX are acknowledged for their valuable feedback._
 
-I love software development. So when I'm given an interesting coding task, my brain immediately goes in development mode. It generates a vague idea what the implementation should look like and, based on that vague idea, I would like to get right to implementing it, getting better understanding of the problem along the way. Once the thing is done and problem is solved, I may add a few unit tests to make the reviewer happy.
+I love software development. So when I'm given an interesting coding task, my brain immediately goes in development mode and generates a vague idea what the implementation should look like. Based on that idea, I would like to get right to implementing it, garnering better understanding of the problem along the way. Once the thing is done and problem is solved, I may add a few unit tests to make the reviewer happy.
 
 While this approach could be productive for very experienced developers, for most of us it will probably lead to a lot of waste. Why? Because when coding new features, you're thinking like an engineer, not like a user.
 
