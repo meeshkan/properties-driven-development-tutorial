@@ -217,4 +217,3 @@ __all__ = [
     "maximum",
     "collect",
 ]
-

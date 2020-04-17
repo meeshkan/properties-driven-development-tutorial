@@ -40,10 +40,16 @@ class SortedDict:
             return False
 
     def keys(self):
-        for key, _ in self.items():
+        return list(self.keys_())
+
+    def keys_(self):
+        for key, _ in self.items_():
             yield key
 
     def items(self):
+        return list(self.items_())
+
+    def items_(self):
         for key, value in tree.collect(self._tree):
             yield key, value
 
