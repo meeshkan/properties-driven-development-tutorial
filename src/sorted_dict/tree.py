@@ -33,18 +33,39 @@ class Tree:
         return "Tree with root: {}".format(repr(self.root))
 
 
-def walk(tree: Tree, func):
+def walk(tree: Tree, func: t.Callable[[int, t.Any], t.Any]):
     if tree.root is None:
         return
 
     _inorder_walk(tree.root, func)
 
 
+def collect(tree: Tree):
+    if tree.root is None:
+        return ()
+
+    return _collect(tree.root)
+
+
+def _collect(node: t.Optional[Node]):
+
+    if node is None:
+        return
+
+    for key, value in _collect(node.left):
+        yield key, value
+
+    yield node.key, node.value
+
+    for key, value in _collect(node.right):
+        yield key, value
+
+
 def _inorder_walk(node: t.Optional[Node], func):
     if node is None:
         return
     _inorder_walk(node.left, func)
-    func(node)
+    func(node.key, node.value)
     _inorder_walk(node.right, func)
 
 
@@ -186,4 +207,14 @@ def _search_node(tree: Tree, key) -> Node:
     raise KeyError("Key {} not found".format(key))
 
 
-__all__ = ["Tree", "insert", "search", "delete", "walk", "minimum", "maximum"]
+__all__ = [
+    "Tree",
+    "insert",
+    "search",
+    "delete",
+    "walk",
+    "minimum",
+    "maximum",
+    "collect",
+]
+

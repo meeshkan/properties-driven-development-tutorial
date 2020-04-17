@@ -39,7 +39,15 @@ class SortedDict:
         except KeyError:
             return False
 
-    def inorder_walk(self, func):
+    def keys(self):
+        for key, _ in self.items():
+            yield key
+
+    def items(self):
+        for key, value in tree.collect(self._tree):
+            yield key, value
+
+    def walk(self, func):
         tree.walk(self._tree, func)
 
 

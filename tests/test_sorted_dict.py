@@ -1,14 +1,10 @@
 from sorted_dict import SortedDict
 from hypothesis import given, assume
-from hypothesis.stateful import (
-    RuleBasedStateMachine,
-    rule,
-    Bundle,
-    consumes,
-)
+from hypothesis.stateful import RuleBasedStateMachine, rule, Bundle, consumes, invariant
 import hypothesis.strategies as some
 import itertools
 import pytest
+import typing as t
 
 
 def keys_and_values():
@@ -45,10 +41,10 @@ def dict_and_values(draw):
     return tree, keys_and_vals
 
 
-def collect(tree: SortedDict):
+def collect_kvs(tree: SortedDict) -> t.Sequence[t.Tuple[int, t.Any]]:
     collected = []
 
-    tree.inorder_walk(lambda x: collected.append(x))
+    tree.walk(lambda key, value: collected.append((key, value)))
     return collected
 
 
@@ -94,7 +90,7 @@ def test_search_after_delete(dict_and_values, data):
 class StatefulDictStateMachine(RuleBasedStateMachine):
     def __init__(self):
         super().__init__()
-        self.tree = SortedDict()
+        self.sorted_dict = SortedDict()
         self.in_dict = {}
 
     inserted_keys = Bundle("inserted")
@@ -102,25 +98,30 @@ class StatefulDictStateMachine(RuleBasedStateMachine):
 
     @rule(target=inserted_keys, key=some.integers(), v=some.text())
     def insert(self, key, v):
-        self.tree[key] = v
+        self.sorted_dict[key] = v
         self.in_dict[key] = v
         return key
 
     @rule(key=inserted_keys)
     def search(self, key):
-        assert self.tree[key] == self.in_dict[key]
+        assert self.sorted_dict[key] == self.in_dict[key]
 
     @rule(key=consumes(inserted_keys))
     def delete(self, key):
         assume(key not in self.in_dict)
-        del self.tree[key]
+        del self.sorted_dict[key]
         del self.in_dict[key]
 
     @rule(key=some.integers())
     def search_non_existing(self, key):
         assume(key not in self.in_dict)
         with pytest.raises(KeyError):  # type: ignore
-            self.tree[key]
+            self.sorted_dict[key]
+
+    @invariant()
+    def keys_sorted(self):
+        keys = list(self.sorted_dict.keys())
+        assert keys == sorted(keys)
 
 
 TestStatefulDict = StatefulDictStateMachine.TestCase
