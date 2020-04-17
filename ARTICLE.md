@@ -11,21 +11,19 @@ tags:
   - python
 ---
 
-> _This article was edited by [Carolyn Stransky](https://dev.to/carolstran). XXX and XXX are acknowledged for their feedback._
+> _This article was edited by [Carolyn Stransky](https://dev.to/carolstran). XXX and XXX are acknowledged for their valuable feedback._
 
-When I'm given an interesting coding task, my brain immediately goes in development mode. I have a vague idea what the implementation will look like and, based on that vague idea, I would like to get right to implementing it, getting better understanding of the problem at hand on the way. Once the thing is done and problem is solved, I may add a few unit tests to make the reviewer happy.
+I love software development. So when I'm given an interesting coding task, my brain immediately goes in development mode. It generates a vague idea what the implementation should look like and, based on that vague idea, I would like to get right to implementing it, getting better understanding of the problem along the way. Once the thing is done and problem is solved, I may add a few unit tests to make the reviewer happy.
 
 While this approach could be productive for very experienced developers, for most of us it will probably lead to a lot of waste. Why? Because when coding new features, you're thinking like an engineer, not like a user.
 
-How to think like a user? By writing tests. It's not important whether you write tests before, during, or after the actual implementation, but tests are vital for guiding development. The authors of the [Pragmatic Programmer]() even go so far to say that _testing is not about finding bugs_.
+How to think like a user? By writing tests. Tests are the first users of your code. It's not important whether you write tests before, during, or after the actual implementation, but they should guide the development. The authors of the [Pragmatic Programmer]() even go so far to say that _testing is not about finding bugs_.
 
 However, writing good tests is hard. It may be easy to come up with happy-path examples where things just work, but it's much harder to come up with test cases stretching the boundaries of your code. Also, it's common have unconscious assumptions about your code that you put in your tests: You may test your code with "foo" and "bar" and therefore conclude it works with any String, but it might actually break horribly when fed with `"\U000f28d4\U0006ef7d"`.
 
 Enter [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8?utm_campaign=Software%2BTesting%2BWeekly&utm_source=Software_Testing_Weekly_14) (PBT). PBT is great for verifying assumptions about your code. If you think your code works with any string, you should let the computer generate a lot of test strings for you and see if it actually does work. Thinking in terms of properties such as _preconditions_, _postconditions_, and _invariants_ also forces you to **think** and explicitly state what your code can and cannot do. Such a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach can immensely help in understanding the problem you're trying to solve before diving into coding.
 
-Properties-driven development is an approach that lets properties guide coding. I learned about the concept from the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book and was immediately intrigued.
-
-In this article, we'll learn what properties-driven development is and how to apply it to guide the development of a custom dictionary datatype.
+Properties-driven development is an approach that lets properties guide coding. In this article, we'll learn what properties-driven development is and how to apply it to guide the development of a custom dictionary datatype. I recently learned about the concept from the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book, so this article is heavily inspired by the contents of the book.
 
 ## ToC
 
