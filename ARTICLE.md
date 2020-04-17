@@ -40,7 +40,7 @@ Enter this article:
 
 ## ToC
 
-- Example project
+- Example project: sorted dictionary
 
   - What should it do?
   - Coming up with properties
@@ -49,9 +49,19 @@ Enter this article:
 
   - Coding the generator
   - Coding the property
-  - Make it pass
+
+- Making the property pass
+
+  - Binary search tree
+  - Sorted dictionary
 
 - Coding invariant
+
+- Handling deletion
+
+- Final touch: add `doctest`
+
+- Bonus: stateful testing
 
 - [Conclusion](#conclusion)
 - [Resources](#resources)
@@ -66,7 +76,7 @@ _\* This guide will use Python for code examples, but the concepts aren't limite
 💻 **References**:
 This [GitHub repository](https://github.com/meeshkan/properties-driven-development-tutorial) contains all the featured code examples as tests. The repository also contains instructions for how to execute them.
 
-## Example project
+## Example project: sorted dictionary
 
 - Implement our own dictionary keeping keys in sorted order
 - Keys and values kept in a binary search tree
@@ -108,8 +118,6 @@ Traceback (most recent call last):
 KeyError: ...
 ```
 
-This serves as `doctest`!
-
 ### Coming up with properties
 
 1. Key-value pairs added to sorted dictionary can be searched.
@@ -123,9 +131,12 @@ This serves as `doctest`!
 
 ## Coding the first property
 
+Introduce Hypothesis.
+
 ### Coding the generator
 
 ```python
+# test_sorted_dict.py
 def some_key_value_tuples():
     """Generator for lists of key-value tuples.
     """
@@ -136,6 +147,7 @@ def some_key_value_tuples():
 ```
 
 ```python
+# test_sorted_dict.py
 @some.composite
 def some_sorted_dicts(draw):
     """Generator of sorted dicts along with the dictionary of
@@ -158,6 +170,7 @@ def some_sorted_dicts(draw):
 ### Coding the property
 
 ```python
+# test_sorted_dict.py
 @given(dict_and_values=some_sorted_dicts())
 def test_insert_and_search(dict_and_values):
     """Key-value pairs added to sorted dictionary can be searched."""
@@ -170,25 +183,13 @@ def test_insert_and_search(dict_and_values):
         )
 ```
 
-### Make it pass
+## Making the property pass
 
-#### Define `SortedDict`
-
-```python
-class SortedDict:
-    def __init__(self):
-        self._tree = tree.Tree()
-
-    def __setitem__(self, key, item):
-        pass
-
-    def __getitem__(self, key):
-        pass
-```
-
-#### Define binary search tree
+### Binary search tree
 
 ```python
+# tree.py
+from dataclasses import dataclass
 import typing as t
 
 @dataclass
@@ -203,6 +204,8 @@ class Tree:
 ```
 
 ```python
+# tree.py
+
 @dataclass
 class Node:
     key: int
@@ -215,21 +218,6 @@ class Node:
         return "Key: {}, Left: ({}), Right: ({})".format(
             self.key, repr(self.left), repr(self.right)
         )
-```
-
-#### Define insert and search
-
-```python
-# sorted_dict.py
-class SortedDict:
-    def __init__(self):
-        self._tree = tree.Tree()
-
-    def __setitem__(self, key, item):
-        tree.insert(self._tree, key, item)
-
-    def __getitem__(self, key):
-        return tree.search(self._tree, key)
 ```
 
 ```python
@@ -287,6 +275,23 @@ def _search_node(tree: Tree, key) -> Node:
     raise KeyError("Key {} not found".format(key))
 ```
 
+### Sorted dictionary
+
+```python
+# sorted_dict.py
+from . import tree
+
+class SortedDict:
+    def __init__(self):
+        self._tree = tree.Tree()
+
+    def __setitem__(self, key, item):
+        tree.insert(self._tree, key, item)
+
+    def __getitem__(self, key):
+        return tree.search(self._tree, key)
+```
+
 ## Coding invariant
 
 ```python
@@ -334,7 +339,7 @@ def _collect(node: t.Optional[Node]):
         yield key, value
 ```
 
-### Verify deletion works
+## Handling deletion
 
 ```python
 @given(
@@ -363,7 +368,7 @@ class SortedDict:
 
 The implementation of `tree.delete` is left as an exercise to the reader.
 
-### Final touch: doctest
+## Final touch: add doctest
 
 ```ini
 # pytest.ini
@@ -374,7 +379,7 @@ doctest_optionflags= NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL
 
 Tests now also collect the doctest from `sorted_dict.py`!
 
-### Bonus: stateful testing
+## Bonus: stateful testing
 
 How to test complex states? You need stuff like this:
 
