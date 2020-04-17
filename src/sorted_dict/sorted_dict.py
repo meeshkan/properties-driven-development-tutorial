@@ -5,12 +5,15 @@ minimum, maximum, predecessor, and successor operations.
 Examples:
 
 >>> tree = SortedDict()
->>> tree[1] = 'one'
->>> tree[1]
-'one'
+>>> tree[2] = 'two'
 >>> tree[2]
+'two'
+>>> tree[1]
 Traceback (most recent call last):
 KeyError: ...
+>>> tree[1] = 'one'
+>>> tree.keys()
+[1, 2]
 >>> del tree[1]
 >>> tree[1]
 Traceback (most recent call last):

@@ -4,11 +4,15 @@ from hypothesis.stateful import RuleBasedStateMachine, rule, Bundle, consumes, i
 import hypothesis.strategies as some
 import itertools
 import pytest
-import typing as t
 
 
-def keys_and_values():
-    return some.lists(some.tuples(some.integers(), some.binary()))
+def some_key_values():
+    """Generator for lists of key-value tuples.
+    """
+    some_keys = some.integers()
+    some_values = some.binary()
+    some_kvs = some.tuples(some_keys, some_values)
+    return some.lists(some_kvs)
 
 
 def dedupe(key_value_pairs):
@@ -31,60 +35,57 @@ def dedupe(key_value_pairs):
 
 
 @some.composite
-def dict_and_values(draw):
-    keys_and_vals = draw(keys_and_values())
+def some_sorted_dicts(draw):
+    """Generator of sorted dicts along with the dictionary of
+    key-value pairs used for constructing it."""
+    key_values = draw(some_key_values())
 
     tree = SortedDict()
-    for key, val in keys_and_vals:
+    for key, val in key_values:
         tree[key] = val
 
-    return tree, keys_and_vals
+    expected = {}
+    for key, val in key_values:
+        expected[key] = val
+
+    return tree, expected
 
 
-def collect_kvs(tree: SortedDict) -> t.Sequence[t.Tuple[int, t.Any]]:
-    collected = []
-
-    tree.walk(lambda key, value: collected.append((key, value)))
-    return collected
-
-
-@given(dict_and_values=dict_and_values())
+@given(dict_and_values=some_sorted_dicts())
 def test_insert_and_search(dict_and_values):
-    dict_tree, inserted = dict_and_values
-    deduped = dedupe(inserted)
-    assert len(deduped) <= len(inserted)
+    sorted_dict, expected = dict_and_values
 
-    for key, value in deduped:
-        in_dict = dict_tree[key]
+    for key, value in expected.items():
+        in_dict = sorted_dict[key]
         assert in_dict == value, "Expected {} for key {}, got {}".format(
             value, key, in_dict
         )
 
 
-@given(dict_and_values=dict_and_values(), data=some.data())
+@given(dict_and_values=some_sorted_dicts(), data=some.data())
 def test_search_nonexisting(dict_and_values, data):
     """Test drawing a key not in dictionary."""
-    dict_tree, inserted = dict_and_values
-    inserted_keys = [key for key, _ in inserted]
+    sorted_dict, expected = dict_and_values
+    inserted_keys = list(expected.keys())
     new_key = data.draw(some.integers())
     assume(new_key not in inserted_keys)
 
     with pytest.raises(KeyError):  # type: ignore
-        dict_tree[new_key]
+        sorted_dict[new_key]
 
 
 @given(
-    dict_and_values=dict_and_values().filter(lambda keyval: len(keyval[1]) > 0),
+    dict_and_values=some_sorted_dicts().filter(lambda drawn: len(drawn[1].keys()) > 0),
     data=some.data(),
 )
 def test_search_after_delete(dict_and_values, data):
     """Test drawing a key not in dictionary."""
-    dict_tree, inserted = dict_and_values
-    inserted_keys = [key for key, _ in inserted]
+    sorted_dict, expected = dict_and_values
+    inserted_keys = list(expected.keys())
     key_to_delete = data.draw(some.sampled_from(inserted_keys), label="Key to delete")
-    del dict_tree[key_to_delete]
+    del sorted_dict[key_to_delete]
     with pytest.raises(KeyError):  # type: ignore
-        dict_tree[key_to_delete]
+        sorted_dict[key_to_delete]
 
 
 class StatefulDictStateMachine(RuleBasedStateMachine):
