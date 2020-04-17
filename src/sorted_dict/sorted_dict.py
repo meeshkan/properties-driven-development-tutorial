@@ -4,18 +4,29 @@ minimum, maximum, predecessor, and successor operations.
 
 Examples:
 
->>> tree = SortedDict()
->>> tree[2] = 'two'
->>> tree[2]
+>>> # Insert and search
+>>> sorted_dict = SortedDict()
+>>> sorted_dict[2] = 'two'
+>>> sorted_dict[2]
 'two'
->>> tree[1]
+>>> # Handles duplicate keys
+>>> sorted_dict[2] = 'two-two'
+>>> sorted_dict[2]
+'two-two'
+>>> # Multiple keys
+>>> sorted_dict[1] = 'one'
+>>> sorted_dict.keys()
+[1, 2]
+>>> # Minimum key
+>>> sorted_dict.min()
+1
+>>> # Non-existing key
+>>> sorted_dict[3]
 Traceback (most recent call last):
 KeyError: ...
->>> tree[1] = 'one'
->>> tree.keys()
-[1, 2]
->>> del tree[1]
->>> tree[1]
+### Deleting key
+>>> del sorted_dict[1]
+>>> sorted_dict[1]
 Traceback (most recent call last):
 KeyError: ...
 """
