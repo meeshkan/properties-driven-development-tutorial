@@ -1,26 +1,10 @@
-"""Custom implementation of mutable dict supporting
-minimum, maximum, predecessor, and successor operations.
-
-Examples:
-
->>> tree = TreeDict()
->>> tree[1] = 'one'
->>> tree[1]
-'one'
->>> tree[2]
-Traceback (most recent call last):
-KeyError: ...
->>> del tree[1]
->>> tree[1]
-Traceback (most recent call last):
-KeyError: ...
+"""Binary search tree.
 """
 
 from dataclasses import dataclass
-from logging import getLogger, basicConfig
+from logging import getLogger
 import typing as t
 
-basicConfig(level="DEBUG")
 log = getLogger(__name__)
 
 
@@ -40,10 +24,20 @@ class Node:
 
 @dataclass
 class Tree:
+    """Binary search tree.
+    """
+
     root: t.Optional["Node"] = None
 
     def __repr__(self):
         return "Tree with root: {}".format(repr(self.root))
+
+
+def walk(tree: Tree, func):
+    if tree.root is None:
+        return
+
+    _inorder_walk(tree.root, func)
 
 
 def _inorder_walk(node: t.Optional[Node], func):
@@ -54,7 +48,7 @@ def _inorder_walk(node: t.Optional[Node], func):
     _inorder_walk(node.right, func)
 
 
-def insert_to(tree: Tree, key, value):
+def insert(tree: Tree, key, value):
     """Reference insertion algorithm from Introduction to Algorithms. Operates in-place.
     """
     y = None
@@ -81,7 +75,7 @@ def insert_to(tree: Tree, key, value):
         y.right = z
 
 
-def transplant(tree: Tree, node1: Node, node2: t.Optional[Node]):
+def _transplant(tree: Tree, node1: Node, node2: t.Optional[Node]):
     log.debug("Transplanting node %s in-place of node %s", repr(node2), repr(node1))
     if node1.parent is None:
         tree.root = node2
@@ -122,10 +116,10 @@ def maximum(node: t.Optional[Node]) -> t.Optional[Node]:
 
 def delete_node(tree: Tree, node: Node):
     if node.left is None:
-        transplant(tree, node, node.right)
+        _transplant(tree, node, node.right)
         return
     elif node.right is None:
-        transplant(tree, node, node.left)
+        _transplant(tree, node, node.left)
         return
 
     y = minimum(node.right)
@@ -133,11 +127,11 @@ def delete_node(tree: Tree, node: Node):
     assert y is not None
 
     if y.parent != node:
-        transplant(tree, y, y.right)
+        _transplant(tree, y, y.right)
         y.right = node.right
         y.right.parent = y
 
-    transplant(tree, node, y)
+    _transplant(tree, node, y)
     y.left = node.left
     y.left.parent = y
 
@@ -170,28 +164,4 @@ def search_node(tree: Tree, key) -> Node:
     raise KeyError("Key {} not found".format(key))
 
 
-class TreeDict:
-    def __init__(self):
-        self.tree = Tree()
-
-    def __setitem__(self, key, item):
-        insert_to(self.tree, key, item)
-
-    def __getitem__(self, key):
-        return search(self.tree, key)
-
-    def __delitem__(self, key):
-        return delete(self.tree, key)
-
-    def __contains__(self, key):
-        try:
-            self[key]
-            return True
-        except KeyError:
-            return False
-
-    def inorder_walk(self, func):
-        _inorder_walk(self.tree.root, func)
-
-
-__all__ = ["TreeDict"]
+__all__ = ["Tree", "insert", "search", "delete", "walk"]
