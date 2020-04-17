@@ -94,7 +94,29 @@ def _transplant(tree: Tree, node1: Node, node2: t.Optional[Node]):
         node2.parent = node1.parent
 
 
-def minimum(node: t.Optional[Node]) -> t.Optional[Node]:
+def minimum(tree: Tree) -> int:
+    if tree.root is None:
+        raise ValueError("No minimum in empty tree")
+
+    min_node = _minimum_node(tree.root)
+
+    assert min_node is not None
+
+    return min_node.key
+
+
+def maximum(tree: Tree) -> int:
+    if tree.root is None:
+        raise ValueError("No maximum in empty tree")
+
+    max_node = _maximum_node(tree.root)
+
+    assert max_node is not None
+
+    return max_node.key
+
+
+def _minimum_node(node: t.Optional[Node]) -> t.Optional[Node]:
     if node is None:
         return None
 
@@ -104,7 +126,7 @@ def minimum(node: t.Optional[Node]) -> t.Optional[Node]:
     return node
 
 
-def maximum(node: t.Optional[Node]) -> t.Optional[Node]:
+def _maximum_node(node: t.Optional[Node]) -> t.Optional[Node]:
     if node is None:
         return None
 
@@ -114,7 +136,7 @@ def maximum(node: t.Optional[Node]) -> t.Optional[Node]:
     return node
 
 
-def delete_node(tree: Tree, node: Node):
+def _delete_node(tree: Tree, node: Node):
     if node.left is None:
         _transplant(tree, node, node.right)
         return
@@ -122,7 +144,7 @@ def delete_node(tree: Tree, node: Node):
         _transplant(tree, node, node.left)
         return
 
-    y = minimum(node.right)
+    y = _minimum_node(node.right)
 
     assert y is not None
 
@@ -138,16 +160,16 @@ def delete_node(tree: Tree, node: Node):
 
 def delete(tree: Tree, key: int):
     log.debug("Deleting key %d from tree", key)
-    node = search_node(tree, key)
-    delete_node(tree, node)
+    node = _search_node(tree, key)
+    _delete_node(tree, node)
 
 
 def search(tree: Tree, key):
-    node = search_node(tree, key)
+    node = _search_node(tree, key)
     return node.value
 
 
-def search_node(tree: Tree, key) -> Node:
+def _search_node(tree: Tree, key) -> Node:
     if tree.root is None:
         raise KeyError("Empty dictionary, can't find key {}".format(key))
 
@@ -164,4 +186,4 @@ def search_node(tree: Tree, key) -> Node:
     raise KeyError("Key {} not found".format(key))
 
 
-__all__ = ["Tree", "insert", "search", "delete", "walk"]
+__all__ = ["Tree", "insert", "search", "delete", "walk", "minimum", "maximum"]
