@@ -1,5 +1,5 @@
 from sorted_dict import SortedDict
-from hypothesis import given, assume
+from hypothesis import given, assume, event
 from hypothesis.stateful import RuleBasedStateMachine, rule, Bundle, consumes, invariant
 import hypothesis.strategies as some
 import pytest
@@ -78,6 +78,10 @@ def test_search_after_delete(dict_and_values, data):
     with pytest.raises(KeyError):  # type: ignore
         sorted_dict[key_to_delete]
 
+    remaining_keys = sorted_dict.keys()
+
+    assert len(remaining_keys) == len(inserted_keys) - 1
+
 
 @given(
     dict_and_expected=some_sorted_dicts().filter(lambda drawn: len(drawn[1].keys()) > 0)
@@ -96,36 +100,44 @@ class StatefulDictStateMachine(RuleBasedStateMachine):
     def __init__(self):
         super().__init__()
         self.sorted_dict = SortedDict()
-        self.in_dict = {}
+        self.state = {}
 
     inserted_keys = Bundle("inserted")
     deleted_keys = Bundle("deleted_keys")
 
-    @rule(target=inserted_keys, key=some.integers(), v=some.text())
-    def insert(self, key, v):
-        self.sorted_dict[key] = v
-        self.in_dict[key] = v
+    @rule(target=inserted_keys, key=some.integers(), value=some.text())
+    def insert(self, key, value):
+        event("Inserting key")
+        self.sorted_dict[key] = value
+        self.state[key] = value
+
         return key
 
     @rule(key=inserted_keys)
     def search(self, key):
-        assert self.sorted_dict[key] == self.in_dict[key]
+        # We may have deleted the key already if it was
+        # a duplicate so check it should be there.
+        assume(key in self.state)
+        event("Searching existing key")
+        assert self.sorted_dict[key] == self.state[key]
 
     @rule(key=consumes(inserted_keys))
     def delete(self, key):
-        assume(key not in self.in_dict)
+        assume(key in self.state)
+        event("Deleting key")
         del self.sorted_dict[key]
-        del self.in_dict[key]
+        del self.state[key]
 
     @rule(key=some.integers())
     def search_non_existing(self, key):
-        assume(key not in self.in_dict)
+        assume(key not in self.state)
+        event("Searching non-existing key")
         with pytest.raises(KeyError):  # type: ignore
             self.sorted_dict[key]
 
     @invariant()
     def keys_sorted(self):
-        keys = list(self.sorted_dict.keys())
+        keys = self.sorted_dict.keys()
         assert keys == sorted(keys)
 
 

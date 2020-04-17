@@ -179,9 +179,204 @@ def test_insert_and_search(dict_and_values):
 
 #### Define insert and search
 
+```python
+# sorted_dict.py
+class SortedDict:
+    def __init__(self):
+        self._tree = tree.Tree()
+
+    def __setitem__(self, key, item):
+        tree.insert(self._tree, key, item)
+
+    def __getitem__(self, key):
+        return tree.search(self._tree, key)
+```
+
+```python
+# tree.py
+def insert(tree: Tree, key, value):
+    """
+    Reference insertion algorithm from Introduction to Algorithms.
+    Operates in-place.
+    """
+    y = None
+    x = tree.root
+
+    log.debug("Inserting key=%d, value=%s", key, value)
+
+    while x is not None:
+        y = x
+        if key < x.key:
+            x = x.left
+        elif key > x.key:
+            x = x.right
+        else:
+            x.value = value
+            return
+
+    z = Node(key=key, value=value, parent=y)
+    if y is None:
+        tree.root = z
+    elif z.key < y.key:
+        y.left = z
+    else:
+        y.right = z
+```
+
+```python
+# tree.py
+def search(tree: Tree, key):
+    node = _search_node(tree, key)
+    return node.value
+
+
+def _search_node(tree: Tree, key) -> Node:
+    if tree.root is None:
+        raise KeyError("Empty dictionary, can't find key {}".format(key))
+
+    x = tree.root
+
+    while x is not None:
+        if key < x.key:
+            x = x.left
+        elif key > x.key:
+            x = x.right
+        else:
+            return x
+
+    raise KeyError("Key {} not found".format(key))
+```
+
 ### Verify invariant: keys are sorted
 
+```python
+# test_sorted_dict.py
+@given(dict_and_values=some_sorted_dicts())
+def test_keys_sorted(dict_and_values):
+    """Invariant: keys in sorted dictionary are sorted."""
+    sorted_dict, _ = dict_and_values
+    keys = sorted_dict.keys()
+    assert keys == sorted(keys)
+```
+
+```python
+# sorted_dict.py
+class SortedDict:
+    ...
+    def keys(self):
+        return list(self.keys_())
+
+    def keys_(self):
+        for key, _ in tree.collect(self._tree)
+            yield key
+```
+
+```python
+# tree.py
+def collect(tree: Tree):
+    if tree.root is None:
+        return ()
+
+    return _collect(tree.root)
+
+
+def _collect(node: t.Optional[Node]):
+
+    if node is None:
+        return
+
+    for key, value in _collect(node.left):
+        yield key, value
+
+    yield node.key, node.value
+
+    for key, value in _collect(node.right):
+        yield key, value
+```
+
 ### Verify deletion works
+
+```python
+@given(
+    dict_and_values=some_sorted_dicts().filter(lambda drawn: len(drawn[1].keys()) > 0),
+    data=some.data(),
+)
+def test_search_after_delete(dict_and_values, data):
+    """
+    Searching a key after deleting the key raises KeyError.
+    """
+    sorted_dict, expected = dict_and_values
+    inserted_keys = list(expected.keys())
+    key_to_delete = data.draw(some.sampled_from(inserted_keys), label="Key to delete")
+    del sorted_dict[key_to_delete]
+    with pytest.raises(KeyError):  # type: ignore
+        sorted_dict[key_to_delete]
+
+    remaining_keys = sorted_dict.keys()
+
+    assert len(remaining_keys) == len(inserted_keys) - 1
+```
+
+```python
+# sorted_dict.py
+class SortedDict:
+    ...
+    def __delitem__(self, key):
+        return tree.delete(self._tree, key)
+```
+
+The implementation of `tree.delete` is left as an exercise to the reader.
+
+### Bonus: stateful testing
+
+```python
+class StatefulDictStateMachine(RuleBasedStateMachine):
+    def __init__(self):
+        super().__init__()
+        self.sorted_dict = SortedDict()
+        self.state = {}
+
+    inserted_keys = Bundle("inserted")
+    deleted_keys = Bundle("deleted_keys")
+
+    @rule(target=inserted_keys, key=some.integers(), value=some.text())
+    def insert(self, key, value):
+        event("Inserting key")
+        self.sorted_dict[key] = value
+        self.state[key] = value
+
+        return key
+
+    @rule(key=inserted_keys)
+    def search(self, key):
+        # We may have deleted the key already if it was
+        # a duplicate so check it should be there.
+        assume(key in self.state)
+        event("Searching existing key")
+        assert self.sorted_dict[key] == self.state[key]
+
+    @rule(key=consumes(inserted_keys))
+    def delete(self, key):
+        assume(key in self.state)
+        event("Deleting key")
+        del self.sorted_dict[key]
+        del self.state[key]
+
+    @rule(key=some.integers())
+    def search_non_existing(self, key):
+        assume(key not in self.state)
+        event("Searching non-existing key")
+        with pytest.raises(KeyError):  # type: ignore
+            self.sorted_dict[key]
+
+    @invariant()
+    def keys_sorted(self):
+        keys = self.sorted_dict.keys()
+        assert keys == sorted(keys)
+
+
+TestStatefulDict = StatefulDictStateMachine.TestCase
+```
 
 ### Conclusion
 
