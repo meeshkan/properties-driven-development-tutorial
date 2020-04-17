@@ -13,17 +13,20 @@ tags:
 
 > _This article was edited by [Carolyn Stransky](https://dev.to/carolstran). XXX and XXX are acknowledged for their feedback._
 
-Testing is not about finding bugs. That's the tip # from the [Pragmatic Programmer](https://pragprog.com/book/tpp20/the-pragmatic-programmer-20th-anniversary-edition) book. According to the authors, tests are rather the first user of your code and, therefore, the primary guide for development.
+Tests are the first user of your code and, therefore, an essential guide for development.
+That's one tip from the [Pragmatic Programmer](https://pragprog.com/book/tpp20/the-pragmatic-programmer-20th-anniversary-edition) book. It's not important whether you write tests before, during, or after the actual implementation, but writing tests should be part of the coding process.
 
-However, writing good tests is hard. First, your imagination is limited. It may be easy to come up with happy-path examples where things just work, but it's much harder to come up with test cases stretching the boundaries of your code. Second, you may have unconscious assumptions about your code that you put in your tests: You may test your code with "foo" and "bar" and therefore conclude it works with any String, but it might actually break horribly when fed with `"\U000f28d4\U0006ef7d"`.
+However, writing good tests is hard. It may be easy to come up with happy-path examples where things just work, but it's much harder to come up with test cases stretching the boundaries of your code. Also, it's common have unconscious assumptions about your code that you put in your tests: You may test your code with "foo" and "bar" and therefore conclude it works with any String, but it might actually break horribly when fed with `"\U000f28d4\U0006ef7d"`.
 
-Enter [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8?utm_campaign=Software%2BTesting%2BWeekly&utm_source=Software_Testing_Weekly_14) (PBT). PBT is great for verifying assumptions. If you think your code works with any string, you should let the computer generate a lot of test strings for you and test the code. Coming up with good properties also forces you to **think** about your code in terms of contracts and invariants, requiring your to explicitly state what your code can and cannot do.
+Enter [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8?utm_campaign=Software%2BTesting%2BWeekly&utm_source=Software_Testing_Weekly_14) (PBT). PBT is great for verifying assumptions about your code. If you think your code works with any string, you should let the computer generate a lot of test strings for you and see if it actually does work. Thinking in terms of properties also forces you to **think** about your code in terms of contracts and invariants, requiring your to explicitly state what your code can and cannot do. Such a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach can immensely help in understanding the problem you're trying to solve before diving into coding.
 
-Properties-driven development is an approach that lets properties guide coding. I learned about the concept from the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book, which has a full chapter devoted to it, and was immediately intrigued. In short, this is how I understand the process to work:
+Properties-driven development is an approach that lets properties guide coding. I learned about the concept from the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book and was immediately intrigued.
+
+In short, this is how I understand the process to work:
 
 1. Imagine how your code would be used
 2. Generalize your examples into properties
-3. Pick a property from the list
+3. Pick a property
 4. Code the properties, ensuring generators work as expected (possibly even writing tests for your generators)
 5. Implement actual code. Don't be afraid to tweak the property.
 6. If everything looks good and there are properties left, go to 3. If your examples or properties need re-thinking, go to 1.
