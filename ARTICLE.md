@@ -13,19 +13,13 @@ tags:
 
 > _This article was edited by [Carolyn Stransky](https://dev.to/carolstran). XXX and XXX are acknowledged for their feedback._
 
-Tests guide development:
+Testing is not about finding bugs. That's the tip # from the [Pragmatic Programmer](https://pragprog.com/book/tpp20/the-pragmatic-programmer-20th-anniversary-edition) book. According to the authors, tests are rather the first user of your code and, therefore, the primary guide for development.
 
-- Testing is not about finding bugs, they are the first user of your code
-- Your imagination is limited: you can't figure out all the ways things can go wrong
-- You may also encode your unconscious assumptions into tests -> You should explicitly state those assumptions
+However, writing good tests is hard. First, your imagination is limited. It may be easy to come up with happy-path examples where things just work, but it's much harder to come up with test cases stretching the boundaries of your code. Second, you may have unconscious assumptions about your code that you put in your tests: You may test your code with "foo" and "bar" and therefore conclude it works with any String, but it might actually break horribly when fed with `"\U000f28d4\U0006ef7d"`.
 
-Enter property-based testing:
+Enter [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8?utm_campaign=Software%2BTesting%2BWeekly&utm_source=Software_Testing_Weekly_14) (PBT). PBT is great for verifying assumptions. If you think your code works with any string, you should let the computer generate a lot of test strings for you and test the code. Coming up with good properties also forces you to **think** about your code in terms of contracts and invariants, requiring your to explicitly state what your code can and cannot do.
 
-- Properties are great for verifying assumptions. Let computer generate the data for your properties.
-- Test contracts and invariants instead of hard-coded inputs and outputs
-- Forces you to **think** about contracts and invariants, explicitly stating the limits of your code
-
-Enter properties-driven development:
+Properties-driven development is an approach that lets properties guide coding. I learned about the concept from the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book, which has a full chapter devoted to it, and was immediately intrigued. In short, this is how I understand the process to work:
 
 1. Imagine how your code would be used
 2. Generalize your examples into properties
@@ -34,9 +28,7 @@ Enter properties-driven development:
 5. Implement actual code. Don't be afraid to tweak the property.
 6. If everything looks good and there are properties left, go to 3. If your examples or properties need re-thinking, go to 1.
 
-Enter this article:
-
-- How to apply the principles to implement a datastructure
+In this article, we'll see how to apply these principles to guide the development of a custom dictionary datatype.
 
 ## ToC
 
