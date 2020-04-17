@@ -47,9 +47,9 @@ Enter this article:
 
 - Coding the first property
 
-  - First generator
-  - First property
-  - Implementation
+  - Coding the generator
+  - Coding the property
+  - Make it pass
 
 - Coding invariant
 
@@ -123,7 +123,7 @@ This serves as `doctest`!
 
 ## Coding the first property
 
-### First generator
+### Coding the generator
 
 ```python
 def some_key_value_tuples():
@@ -155,7 +155,7 @@ def some_sorted_dicts(draw):
     return sorted_dict, expected
 ```
 
-### First property
+### Coding the property
 
 ```python
 @given(dict_and_values=some_sorted_dicts())
@@ -170,7 +170,7 @@ def test_insert_and_search(dict_and_values):
         )
 ```
 
-### Implementation
+### Make it pass
 
 #### Define `SortedDict`
 
