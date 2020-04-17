@@ -18,8 +18,8 @@ def keys_and_values():
 def dedupe(key_value_pairs):
     """Remove duplicate keys by always picking the last. Also sorts the array by key.
     
->>> dedupe([(0, 0), (0, 1), (1, 2), (0, 2)])
-[(0, 2), (1, 2)]
+    >>> dedupe([(0, 0), (0, 1), (1, 2), (0, 2)])
+    [(0, 2), (1, 2)]
     
     """
     as_sorted = sorted(key_value_pairs, key=lambda pair: pair[0])
