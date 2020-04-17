@@ -32,15 +32,16 @@ Enter properties-driven development:
 
 ### Example
 
-- Implement our own dictionary keeping keys in sorted order.
-- Searches O(lg n).
-- Unbalanced
+- Implement our own dictionary keeping keys in sorted order
+- Keys and values kept in a binary search tree
+- Insertions, searches, deletions O(lg n) on average
+- Unbalanced, you should use [`sortedcontainers`](https://github.com/grantjenks/python-sortedcontainers/) for anything real
 
 Why this?
 
 1. Property-based tests are not only for functional programming
-1. It's complex enough to deserve good testing
-1. I'm currently interested in algorithms and datastructures
+1. It's complex enough to possibly have tricky bugs
+1. I'm interested in datastructures and algorithms
 
 ### What the code should do
 
