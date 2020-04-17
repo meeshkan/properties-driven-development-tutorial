@@ -138,7 +138,8 @@ Introduce Hypothesis.
 ```python
 # test_sorted_dict.py
 def some_key_value_tuples():
-    """Generator for lists of key-value tuples.
+    """
+    Generator for lists of key-value tuples.
     """
     some_keys = some.integers()
     some_values = some.binary()
@@ -150,8 +151,10 @@ def some_key_value_tuples():
 # test_sorted_dict.py
 @some.composite
 def some_sorted_dicts(draw):
-    """Generator of sorted dicts along with the dictionary of
-    key-value pairs used for constructing it."""
+    """
+    Generator of sorted dicts along with the dictionary of
+    key-value pairs used for constructing it.
+    """
     key_values = draw(some_key_value_tuples())
 
     sorted_dict = SortedDict()
@@ -173,7 +176,9 @@ def some_sorted_dicts(draw):
 # test_sorted_dict.py
 @given(dict_and_values=some_sorted_dicts())
 def test_insert_and_search(dict_and_values):
-    """Key-value pairs added to sorted dictionary can be searched."""
+    """
+    Key-value pairs added to sorted dictionary can be searched.
+    """
     sorted_dict, expected = dict_and_values
 
     for key, value in expected.items():
@@ -194,7 +199,8 @@ import typing as t
 
 @dataclass
 class Tree:
-    """Binary search tree.
+    """
+    Binary search tree for key-value pairs. Overwrites duplicates.
     """
 
     root: t.Optional[Node] = None
@@ -298,7 +304,9 @@ class SortedDict:
 # test_sorted_dict.py
 @given(dict_and_values=some_sorted_dicts())
 def test_keys_sorted(dict_and_values):
-    """Invariant: keys in sorted dictionary are sorted."""
+    """
+    Invariant: keys in sorted dictionary are sorted.
+    """
     sorted_dict, _ = dict_and_values
     keys = sorted_dict.keys()
     assert keys == sorted(keys)
