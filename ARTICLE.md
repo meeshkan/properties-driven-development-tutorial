@@ -13,6 +13,8 @@ tags:
 
 > _This article was edited by [Carolyn Stransky](https://dev.to/carolstran). XXX and XXX are acknowledged for their valuable feedback._
 
+### Intro alternative 1
+
 In his book [Thinking, Fast and Slow](), Daniel Kahneman describes the two modes of thought our brain uses. The first one is fast, instinctive, and emotional, and the second one is slower, more deliberate and more logical. The slow thinking mode is generally more appropriate for solving complex tasks.
 
 Imagine you're given an interesting coding task. It's likely that the fast mode of thought activates. Based on years of experience of software development, your brain generates an idea of what the implementation should look like, and, based on that idea, it would be very tempting to jump into implementing it.
@@ -26,6 +28,16 @@ However, writing good tests is hard. It may be easy to come up with happy-path e
 Enter [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8?utm_campaign=Software%2BTesting%2BWeekly&utm_source=Software_Testing_Weekly_14) (PBT). PBT is great for verifying assumptions about your code. If you think your code works with any string, you should let the computer generate a lot of test strings for you and see if it actually does work. Thinking in terms of properties such as _preconditions_, _postconditions_, and _invariants_ also forces you to **think** and explicitly state what your code can and cannot do. Such a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach can immensely help in understanding the problem you're trying to solve before diving into coding.
 
 Properties-driven development is an approach that lets properties guide coding. In this article, we'll learn what properties-driven development is and how to apply it to guide the development of a custom dictionary datatype. I recently learned about the concept from the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book, so this article is heavily inspired by the contents of the book.
+
+### Intro alternative 2
+
+Properties-driven development means the application of property-based testing in the context of test-driven development. While coding, you constantly write tests to ensure your code is easily testable and usable. Instead of relying on hard-coded inputs and outputs in your tests, you spend time writing _generators of test cases_. From generators, you derive _properties_ that should hold for your code.
+
+Thinking in terms of properties forces you to be very explicit about what your code is and is not expected to handle. You're effectively adopting a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach, which can immensely help in understanding the problem you're trying to solve before diving into coding.
+
+In this article, we'll learn what properties-driven development looks like. We also apply the principles to develop a module for a sorted dictionary.
+
+I recently learned about the concept from the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book, so this article is heavily inspired by the contents of the book.
 
 ## ToC
 
@@ -68,9 +80,9 @@ This [GitHub repository](https://github.com/meeshkan/properties-driven-developme
 
 ## Properties-driven development 101
 
-Properties-driven development is essentially test-driven development in the context of property-based testing. Like in test-driven development, you first think what your code should do and put that into a test. But instead of having that test be a single example of input and output, you instead try to write _properties_ for what your code is doing.
+As mentioned in the introduction, properties-driven development is essentially test-driven development in the context of property-based testing. Test-driven development asks you to think what your code should do and put that into a test. Property-based testing asks you to formulate that test in terms of _properties_.
 
-For example, assume you're writing code for converting a [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) into a [JSON](https://en.wikipedia.org/wiki/JSON) array. Instead of jumping into writing a CSV parser, test-driven development first asks you to come up with test cases. Here's an example input:
+For example, assume you're writing code for converting a [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) into a [JSON](https://en.wikipedia.org/wiki/JSON) array. Instead of jumping into writing a CSV parser, test-driven development asks you to come up with test cases. Here's an example input:
 
 ```csv
 a,b,c
@@ -87,7 +99,7 @@ This should be turned into a the following JSON:
 ]
 ```
 
-This would make a nice unit test for your code, and so you're good to go implementing it! However, the test has some assumptions baked within:
+This would make a nice unit test for your code! However, the test has quite a few assumptions baked within:
 
 - Keys are distinct
 - Values are integers
@@ -95,11 +107,11 @@ This would make a nice unit test for your code, and so you're good to go impleme
 
 Being a good developer you are, you would of course go on writing unit tests to cover each of those assumptions with the behaviour you want.
 
-The bad news is our imagination is limited: it's all too easy to accidentally skip assumptions you made in generating your example inputs. For example, above we did not mention whether our parser works when the CSV is empty or when the CSV only has the header row.
+The bad news is your imagination is limited: it's all too easy to accidentally skip assumptions you made in generating your example inputs. For example, above we did not mention whether our parser works when the CSV is empty or when the CSV only has the header row.
 
-Property-based tests are excellent for forcing you to think slowly and to be **explicit about your assumptions**.
+Property-based tests are excellent for forcing you to be **explicit about your assumptions**.
 
-To come up with properties for our CSV-to-JSON parser, we would need to first generate CSVs we expect to be valid. Here's one generator:
+To come up with properties for our CSV-to-JSON parser, we would need to first generate CSVs we expect our parser to be able to handle. Here's the pseudocode for one such generator:
 
 1. Generate keys: a list of arbitrary strings,
 1. Generate the number of rows: a non-negative integer,
