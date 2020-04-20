@@ -31,9 +31,9 @@ Properties-driven development is an approach that lets properties guide coding. 
 
 ### Intro alternative 2
 
-Properties-driven development means the application of property-based testing in the context of test-driven development. While coding, you constantly write tests to ensure your code is easily testable and usable. Instead of relying on hard-coded inputs and outputs in your tests, you spend time writing _generators of test cases_. From generators, you derive _properties_ that should hold for your code.
+Properties-driven development is the application of [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8?utm_campaign=Software%2BTesting%2BWeekly&utm_source=Software_Testing_Weekly_14) in the context of test-driven development. While coding, we constantly write tests to ensure our code is easily testable and usable. Instead of relying on hard-coded inputs and outputs in our tests, we instead write _generators of test cases_ and ensure given _properties_ hold for our code.
 
-Thinking in terms of properties forces you to be very explicit about what your code is and is not expected to handle. You're effectively adopting a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach, which can immensely help in understanding the problem you're trying to solve before diving into coding.
+Thinking in terms of properties forces us to be very explicit about what our code can and cannot do. We're effectively adopting a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach, which can immensely help in understanding the problem we're trying to solve before diving into coding.
 
 In this article, we'll learn what properties-driven development looks like. We also apply the principles to develop a module for a sorted dictionary.
 
@@ -41,32 +41,20 @@ I recently learned about the concept from the [Property-Based Testing with PropE
 
 ## ToC
 
-- Properties-driven development 101
+- What is properties-driven development?
+
 - Example project: sorted dictionary
 
   - What should it do?
   - Listing requirements
+  - Implementing insert and search
+  - Implementing deletion
+  - Ensuring keys are sorted
+  - Stateful testing
+  - Final touch: add `doctest`
 
-- Coding the first property
-
-  - Coding the generator
-  - Coding the property
-
-- Making the property pass
-
-  - Binary search tree
-  - Sorted dictionary
-
-- Handling deletion
-
-- Coding invariant
-
-- Stateful testing
-
-- Final touch: add `doctest`
-
-* [Conclusion](#conclusion)
-* [Resources](#resources)
+- [Conclusion](#conclusion)
+- [Resources](#resources)
 
 ⚠️ **Prerequisites**:
 
@@ -78,11 +66,11 @@ _\* This guide will use Python for code examples, but the concepts aren't limite
 💻 **References**:
 This [GitHub repository](https://github.com/meeshkan/properties-driven-development-tutorial) contains all the featured code examples as tests. The repository also contains instructions for how to execute them.
 
-## Properties-driven development 101
+## What is properties-driven development?
 
-As mentioned in the introduction, properties-driven development is essentially test-driven development in the context of property-based testing. Test-driven development asks you to think what your code should do and put that into a test. Property-based testing asks you to formulate that test in terms of _properties_.
+As mentioned in the introduction, properties-driven development is essentially test-driven development in the context of property-based testing. Test-driven development asks us to think what our code should do and put that into a test. Property-based testing asks us to formulate that test in terms of _properties_.
 
-For example, assume you're writing code for converting a [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) into a [JSON](https://en.wikipedia.org/wiki/JSON) array. Instead of jumping into writing a CSV parser, test-driven development asks you to come up with test cases. Here's an example input:
+For example, assume we're writing code for converting a [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) into a [JSON](https://en.wikipedia.org/wiki/JSON) array. Instead of jumping into writing a CSV parser, test-driven development asks us to come up with test cases. Here's an example input:
 
 ```csv
 a,b,c
@@ -90,7 +78,7 @@ a,b,c
 6,3,2
 ```
 
-This should be turned into a the following JSON:
+This should be turned into the following JSON:
 
 ```json
 [
@@ -99,17 +87,15 @@ This should be turned into a the following JSON:
 ]
 ```
 
-This would make a nice unit test for your code! However, the test has quite a few assumptions baked within:
+This would make a nice unit test for our code! However, the test has quite a few assumptions baked within:
 
 - Keys are distinct
 - Values are integers
 - There are no missing values
 
-Being a good developer you are, you would of course go on writing unit tests to cover each of those assumptions with the behaviour you want.
+Being good developers we are, we would of course go on writing unit tests to cover each of those assumptions with the behaviour we want. The bad news is our imaginations are limited. For example, above we did not mention whether our parser works when the CSV is empty or when the CSV only has the header row.
 
-The bad news is your imagination is limited: it's all too easy to accidentally skip assumptions you made in generating your example inputs. For example, above we did not mention whether our parser works when the CSV is empty or when the CSV only has the header row.
-
-Property-based tests are excellent for forcing you to be **explicit about your assumptions**.
+Property-based tests are excellent for forcing us to be **explicit about our assumptions**.
 
 To come up with properties for our CSV-to-JSON parser, we would need to first generate CSVs we expect our parser to be able to handle. Here's the pseudocode for one such generator:
 
@@ -117,13 +103,13 @@ To come up with properties for our CSV-to-JSON parser, we would need to first ge
 1. Generate the number of rows: a non-negative integer,
 1. Generate rows: For each row and key, generate an arbitrary string value.
 
-Can you see how many tricky cases our generator forces us to cover? The list of keys may be empty, the number of rows may be zero, and we assume our code works with arbitrary strings (including empty strings) both as keys and values. Generator as above pushes the boundaries of your parser.
+Can you see how many tricky cases our generator forces us to cover? The list of keys may be empty, the number of rows may be zero, and we assume our code works with arbitrary strings (including empty strings) both as keys and values. Generator as above would push our CSV parser to its limits!
 
-The above generator is an example of a "bottom-up" approach to data generation. Instead of generating totally random CSVs, we generate them bottom-up, keeping track of what goes in so that we know what our expected result is. This avoids the problem where you need to duplicate the implementation in your tests. For example, with the generator above, we know the length of the resulting JSON array should be equal to the non-negative integer drawn at step 2. number of rows we generated. That's a good property!
+The above generator is an example of a "bottom-up" approach to data generation. Instead of generating totally random CSVs, we generate them bottom-up, keeping track of what goes in so that we know what our expected result is. This avoids the problem where we need to duplicate the implementation in tests. For example, with the generator above, we know the length of the resulting JSON array should be equal to the non-negative integer drawn at step 2, the number of rows we generated. That's a good property!
 
 ## Example project: sorted dictionary
 
-As an example project, we'll build our own **sorted dictionary** in Python. We call the datastructure `SortedDict` and expect it to always keep its keys in sorted order. Such a `SortedDict` might be useful for keeping, for example, users in the order they logged into your application. You're also able to traverse the sorted list of key-value pairs in linear time.
+As an example project, we'll build our own **sorted dictionary** in Python. We call the datastructure `SortedDict` and expect it to always keep its keys in sorted order. Such a `SortedDict` might be useful for keeping, for example, users in the order they logged into our application. We're also able to traverse the sorted list of key-value pairs in linear time.
 
 We implement the sorting using a standard [binary search tree](https://en.wikipedia.org/wiki/Binary_search_tree). While the average running time for insert, search and delete operations in binary search tree is `O(lg(n))`, where `n` is the number of keys, the worst-case running time for such operations is linear. Therefore, you should use [`sortedcontainers`](https://github.com/grantjenks/python-sortedcontainers/) for production usage.
 
@@ -133,7 +119,7 @@ For the simplicity of this article, we assume the keys are integers and that the
 
 ### What should it do?
 
-To come up with properties, we first need to come up with the requirements for our `SortedDict`. To do that, we'll first simply play around with the expected API.
+To come up with properties, we first need to come up with the requirements for our `SortedDict`. One way to come up with requirements is to play around with the API we expect our module to have.
 
 First, we probably expect we can search for an inserted key:
 
@@ -145,13 +131,13 @@ First, we probably expect we can search for an inserted key:
 'two'
 ```
 
-We also expect keys are always sorted irrespective of the insertion order (we're not building [`OrderedDict`](https://docs.python.org/3.8/library/collections.html#collections.OrderedDict)!). Continuing on above:
+We also expect keys are always sorted irrespective of the insertion order. Continuing on above:
 
 ```python
 >>> # Keys are sorted
 >>> sorted_dict[1] = 'one'
 >>> sorted_dict.keys()
->>> [1, 2]
+[1, 2]
 ```
 
 Like with the standard dictionary, we expect re-inserting an existing key will result in the value being overwritten:
@@ -160,7 +146,7 @@ Like with the standard dictionary, we expect re-inserting an existing key will r
 >>> # Handles duplicate keys
 >>> sorted_dict[2] = 'two-two'
 >>> sorted_dict[2]
->>> 'two-two'
+'two-two'
 ```
 
 We expect searching for a non-existing key raises `KeyError`:
@@ -168,8 +154,8 @@ We expect searching for a non-existing key raises `KeyError`:
 ```python
 >>> # Non-existing key
 >>> sorted_dict[3]
->>> Traceback (most recent call last):
->>> KeyError: ...
+Traceback (most recent call last):
+KeyError: ...
 ```
 
 Finally, if we delete a key, we know searching for it will raise a `KeyError`:
@@ -178,8 +164,8 @@ Finally, if we delete a key, we know searching for it will raise a `KeyError`:
 >>> # Searching for deleted key
 >>> del sorted_dict[1]
 >>> sorted_dict[1]
->>> Traceback (most recent call last):
->>> KeyError: ...
+Traceback (most recent call last):
+KeyError: ...
 ```
 
 ### Listing requirements
@@ -194,7 +180,7 @@ Now that we have a grasp for what we expect our code to do, we can try to genera
 
 Such requirements serve as the basis for **properties**. Next, we'll first write a property for the first requirement: one can insert key-value pairs into the dictionary and then search for them.
 
-## Coding the first property
+### Implementing insert and search
 
 We'll use the [Hypothesis](https://hypothesis.readthedocs.io/) library for writing properties for our sorted dictionary. Hypothesis supports generating [almost any kind of data](https://hypothesis.readthedocs.io/en/latest/data.html) you can imagine and provides simple decorators for writing property-based testing.
 
@@ -215,7 +201,9 @@ class SortedDict:
 
 The `__setitem__` method is called when `sorted_dict[key] = item` is invoked. Similarly, `__getitem__` defines the behaviour for `sorted_dict[key]`.
 
-Before going any further in the implementation, we write down the property. Proceeding one step at a time like this is a good way to ensure your tests work as expected: once you're done writing a test, make sure it fails before getting into implementation.
+Before going any further in the implementation, we write down the property. Proceeding one step at a time like this is a good way to ensure our tests work as expected: once we're done writing a test, we make sure it fails before getting into implementation.
+
+#### Generator
 
 To get started with the property, we need a generator of key-value tuples. Here's how to do it in Hypothesis:
 
@@ -246,7 +234,7 @@ To see what data this generator can generate, we can call `some_key_value_tuples
 [(-19443, b'\x16ERa'), (-425, b'')]
 ```
 
-Having a generator for lists of key-value tuples, we wish to build a `SortedDict` instance containing those tuples. In Hypothesis, you can use [`hypothesis.strategies.composite`](https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.composite) to compose generators as follows:
+Having a generator for lists of key-value tuples, we wish to build a `SortedDict` instance containing those tuples. With Hypothesis, we can use [`hypothesis.strategies.composite`](https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.composite) to compose generators as follows:
 
 ```python
 # test_sorted_dict.py
@@ -285,7 +273,7 @@ def some_sorted_dicts(draw):
 
 The variable `expected` contains the key-value pairs we expect to find from our sorted dictionary. It acts as a simplified "model" for sorted dictionary with the exception that its keys are not sorted. Using a standard dictionary as the model is useful also because it handles duplicates in the same way as we expect `SortedDict` to handle them (overwrite).
 
-### Coding the property
+#### Property
 
 Having the test case generator `some_sorted_dicts` defined, we're ready to state our first property: that any keys inserted into the dictionary can be searched.
 
@@ -309,9 +297,7 @@ Test case is marked as Hypothesis test with the `@given` decorator. When this te
 
 If we run the tests now, they should fail: we need to implement `__setitem__` and `__getitem__`. For those, we need the binary search tree.
 
-## Making the property pass
-
-### Binary search tree
+#### Binary search tree
 
 For the binary search tree, we use the implementation from [Introduction to Algorithms](https://en.wikipedia.org/wiki/Introduction_to_Algorithms) book. Because the implementation is not that important for the purposes of this article, we proceed quickly.
 
@@ -416,7 +402,7 @@ def _search_node(tree: Tree, key) -> Node:
 
 Search involves a helper function that searches a `Node` by key. We'll need this when implementing deletion.
 
-### Sorted dictionary
+#### Putting it all together
 
 With the tree supporting insert and search, we can use the tree in our `SortedDict`:
 
@@ -447,7 +433,7 @@ We have now implemented the first requirement with a property-based test. Let's 
 
 We could also consider requirement 2 be checked if we trust Hypothesis to generate duplicate keys. We could work on the requirement of keeping keys sorted, but we actually want that to hold also after deletions, as that's the trickiest operation. We'll therefore handle requirement 5 next.
 
-## Handling deletion
+### Implementing deletion
 
 The requirement states that searching for a deleted key raises `KeyError`. How can we put that into a property? An easy way is to use our `some_sorted_dicts()` generator from above and let Hypothesis draw one of the keys for deletion. We then delete that key and ensure searching raises `KeyError`.
 
@@ -514,7 +500,7 @@ Our list of requirements now looks as following:
 
 As our last example, we write a property for the keys being always sorted.
 
-## Coding invariant
+### Ensuring keys are sorted
 
 A property such as "Keys are always sorted" is an invariant: Whatever operations are performed, it remains true. Ensuring all the dictionaries we generate have sorted keys is straightforward:
 
@@ -549,9 +535,9 @@ def test_search_after_delete(dict_and_values, data):
 
 While this works, there's something unsatisfactory about it. The premise of property-based testing is that we can cover all kinds of unexpected cases. Here, we're hard-coding the cases where the invariant should be tested. Is there something we can do to randomize testing the invariant?
 
-Enter [stateful testing](https://hypothesis.readthedocs.io/en/latest/stateful.html). With stateful tests, you define operations that can be run but leave their order for the framework to decide.
+Enter [stateful testing](https://hypothesis.readthedocs.io/en/latest/stateful.html). With stateful tests, we define operations that can be run but leave their order for the framework to decide.
 
-In Hypothesis, you use [`RuleBasedStateMachine`]() for that. We won't go into details, but here's an example for `SortedDict`:
+In Hypothesis, one can use [`RuleBasedStateMachine`]() for that. We won't go into details, but here's an example for `SortedDict`:
 
 ```python
 # test_sorted_dict.py
@@ -604,7 +590,7 @@ TestStatefulDict = StatefulDictStateMachine.TestCase
 
 The methods defined in our `RuleBasedStateMachine` decorated with `@rule` define the "commands" the state machine runs. The decorator `@invariant` ensures that the keys being sorted is checked after every command. We also keep a "model" of our current expected state in `self.state` to know what keys our `SortedDict` is expected to contain.
 
-Stateful tests such as above can work wonders for revealing tricky bugs in your code. They can, however, be very hard to debug, so always try to cover as many cases as possible with regular unit and property-based tests.
+Stateful tests such as above can work wonders for revealing tricky bugs. They can, however, be very hard to debug, so always try to cover as many cases as possible with regular unit and property-based tests.
 
 ## Final touch: add doctest
 
@@ -656,7 +642,7 @@ The second line configures doctest to ignore extraneous whitespaces and exceptio
 
 When `pytest` is run, it now also runs the examples from the documentation.
 
-### Conclusion
+## Conclusion
 
 - Properties can drive development
 - Generalize examples into properties and turn properties into property-based tests
