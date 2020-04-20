@@ -295,11 +295,15 @@ def test_insert_and_search(dict_and_values):
 
 Test case is marked as Hypothesis test with the `@given` decorator. When this test is run, Hypothesis will generate 100 different sorted dictionaries and verify that all key-value pairs expected to be found in the dictionary are found.
 
-If we run the tests now, they should fail: we need to implement `__setitem__` and `__getitem_`. For those, we need the binary search tree.
+If we run the tests now, they should fail: we need to implement `__setitem__` and `__getitem__`. For those, we need the binary search tree.
 
 ## Making the property pass
 
 ### Binary search tree
+
+For the binary search tree, we use the implementation from [Introduction to Algorithms](https://en.wikipedia.org/wiki/Introduction_to_Algorithms) book. Because the implementation is not that important for the purposes of this article, we proceed quickly.
+
+`Tree` is defined as a [dataclass](https://docs.python.org/3/library/dataclasses.html) as follows:
 
 ```python
 # tree.py
@@ -309,14 +313,16 @@ import typing as t
 @dataclass
 class Tree:
     """
-    Binary search tree for key-value pairs. Overwrites duplicates.
+    Binary search tree.
     """
 
     root: t.Optional[Node] = None
 
     def __repr__(self):
-        return "Tree with root: {}".format(repr(self.root))
+        return "Tree(root={})".format(repr(self.root))
 ```
+
+Tree has only one attribute, `root`. If the tree is empty, `root` is equal to `None`. Otherwise, it contains a `Node` defined like this:
 
 ```python
 # tree.py
@@ -330,10 +336,12 @@ class Node:
     right: t.Optional["Node"] = None
 
     def __repr__(self):
-        return "Key: {}, Left: ({}), Right: ({})".format(
-            self.key, repr(self.left), repr(self.right)
+        return "Node(key={}, value={}, left=({}), right=({})".format(
+            self.key, repr(self.value), repr(self.left), repr(self.right)
         )
 ```
+
+A node has a key and a value. It also contains references to its left and right children as well as its parent. Note that `parent` is not included in `__repr__` to avoid infinite loops (printing a child prints the parent, which prints the child...).
 
 ```python
 # tree.py
