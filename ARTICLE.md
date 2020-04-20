@@ -15,6 +15,16 @@ tags:
 
 ### Intro alternative 1
 
+Properties-driven development is the application of [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8?utm_campaign=Software%2BTesting%2BWeekly&utm_source=Software_Testing_Weekly_14) in the context of test-driven development. While coding, we constantly write tests to ensure our code is easily testable and usable. Instead of relying on hard-coded inputs and outputs in our tests, we instead write _generators of test cases_ and ensure given _properties_ hold for our code.
+
+Thinking in terms of properties forces us to be very explicit about what our code can and cannot do. We're effectively adopting a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach, which can immensely help in understanding the problem we're trying to solve before diving into coding.
+
+In this article, we'll learn what properties-driven development looks like. We also apply the principles to develop a module for a sorted dictionary.
+
+I recently learned about the concept from the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book, so this article is heavily inspired by the contents of the book.
+
+### Intro alternative 2
+
 In his book [Thinking, Fast and Slow](), Daniel Kahneman describes the two modes of thought our brain uses. The first one is fast, instinctive, and emotional, and the second one is slower, more deliberate and more logical. The slow thinking mode is generally more appropriate for solving complex tasks.
 
 Imagine you're given an interesting coding task. It's likely that the fast mode of thought activates. Based on years of experience of software development, your brain generates an idea of what the implementation should look like, and, based on that idea, it would be very tempting to jump into implementing it.
@@ -28,16 +38,6 @@ However, writing good tests is hard. It may be easy to come up with happy-path e
 Enter [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8?utm_campaign=Software%2BTesting%2BWeekly&utm_source=Software_Testing_Weekly_14) (PBT). PBT is great for verifying assumptions about your code. If you think your code works with any string, you should let the computer generate a lot of test strings for you and see if it actually does work. Thinking in terms of properties such as _preconditions_, _postconditions_, and _invariants_ also forces you to **think** and explicitly state what your code can and cannot do. Such a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach can immensely help in understanding the problem you're trying to solve before diving into coding.
 
 Properties-driven development is an approach that lets properties guide coding. In this article, we'll learn what properties-driven development is and how to apply it to guide the development of a custom dictionary datatype. I recently learned about the concept from the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book, so this article is heavily inspired by the contents of the book.
-
-### Intro alternative 2
-
-Properties-driven development is the application of [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8?utm_campaign=Software%2BTesting%2BWeekly&utm_source=Software_Testing_Weekly_14) in the context of test-driven development. While coding, we constantly write tests to ensure our code is easily testable and usable. Instead of relying on hard-coded inputs and outputs in our tests, we instead write _generators of test cases_ and ensure given _properties_ hold for our code.
-
-Thinking in terms of properties forces us to be very explicit about what our code can and cannot do. We're effectively adopting a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach, which can immensely help in understanding the problem we're trying to solve before diving into coding.
-
-In this article, we'll learn what properties-driven development looks like. We also apply the principles to develop a module for a sorted dictionary.
-
-I recently learned about the concept from the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book, so this article is heavily inspired by the contents of the book.
 
 ## ToC
 
@@ -68,7 +68,7 @@ This [GitHub repository](https://github.com/meeshkan/properties-driven-developme
 
 ## What is properties-driven development?
 
-As mentioned in the introduction, properties-driven development is essentially test-driven development in the context of property-based testing. Test-driven development asks us to think what our code should do and put that into a test. Property-based testing asks us to formulate that test in terms of _properties_.
+As mentioned in the introduction, properties-driven development is essentially _test-driven development_ in the context of _property-based testing_. Test-driven development asks us to think what our code should do and put that into a test. Property-based testing asks us to formulate that test in terms of _properties_.
 
 For example, assume we're writing code for converting a [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) into a [JSON](https://en.wikipedia.org/wiki/JSON) array. Instead of jumping into writing a CSV parser, test-driven development asks us to come up with test cases. Here's an example input:
 
@@ -93,27 +93,29 @@ This would make a nice unit test for our code! However, the test has quite a few
 - Values are integers
 - There are no missing values
 
-Being good developers we are, we would of course go on writing unit tests to cover each of those assumptions with the behaviour we want. The bad news is our imaginations are limited. For example, above we did not mention whether our parser works when the CSV is empty or when the CSV only has the header row.
+Being good developers we are, we would of course go on writing unit tests to cover each of those assumptions with the behaviour we want. The bad news is our imaginations are limited. For example, above we forgot to list the assumptions that the list of keys is non-empty and there's at least one row in the CSV.
 
-Property-based tests are excellent for forcing us to be **explicit about our assumptions**.
-
-To come up with properties for our CSV-to-JSON parser, we would need to first generate CSVs we expect our parser to be able to handle. Here's the pseudocode for one such generator:
+Property-based tests are excellent for forcing us to be **explicit about our assumptions**. To come up with properties for our CSV-to-JSON parser, we would need to first generate CSVs we expect our parser to be able to handle. Here's the pseudocode for one such generator:
 
 1. Generate keys: a list of arbitrary strings,
 1. Generate the number of rows: a non-negative integer,
 1. Generate rows: For each row and key, generate an arbitrary string value.
 
-Can you see how many tricky cases our generator forces us to cover? The list of keys may be empty, the number of rows may be zero, and we assume our code works with arbitrary strings (including empty strings) both as keys and values. Generator as above would push our CSV parser to its limits!
+Can you see how many tricky cases our generator forces us to cover? The list of keys may be empty, the number of rows may be zero, and we assume our code works with arbitrary strings (including empty strings and strings containing commas) both as keys and values. Generator as above would push our CSV parser to its limits!
+
+The generator as above might turn out to be too demanding for our use case. If that happens, we can simply relax the generator to produce "friendlier" data. Instead of "programming by coincidence", where specific cases may or may not be supported, we've consciously made the decision which cases are supported.
 
 The above generator is an example of a "bottom-up" approach to data generation. Instead of generating totally random CSVs, we generate them bottom-up, keeping track of what goes in so that we know what our expected result is. This avoids the problem where we need to duplicate the implementation in tests. For example, with the generator above, we know the length of the resulting JSON array should be equal to the non-negative integer drawn at step 2, the number of rows we generated. That's a good property!
+
+This concludes the brief introduction to properties-driven development. We next move to applying the principles in an example project.
 
 ## Example project: sorted dictionary
 
 As an example project, we'll build our own **sorted dictionary** in Python. We call the datastructure `SortedDict` and expect it to always keep its keys in sorted order. Such a `SortedDict` might be useful for keeping, for example, users in the order they logged into our application. We're also able to traverse the sorted list of key-value pairs in linear time.
 
-We implement the sorting using a standard [binary search tree](https://en.wikipedia.org/wiki/Binary_search_tree). While the average running time for insert, search and delete operations in binary search tree is `O(lg(n))`, where `n` is the number of keys, the worst-case running time for such operations is linear. Therefore, you should use [`sortedcontainers`](https://github.com/grantjenks/python-sortedcontainers/) for production usage.
+We keep the keys sorted by storing the key-value pairs in a [binary search tree](https://en.wikipedia.org/wiki/Binary_search_tree). Because the standard tree could be unbalanced and therefore ineffective, you should use [`sortedcontainers`](https://github.com/grantjenks/python-sortedcontainers/) in real-life use cases.
 
-Implementing sorted dictionary makes a good example for properties-driven development for various reasons. First, it shows that PBT is not only for functional programming but just as useful for implementing a mutable dictionary. Second, while the implementation is straight-forward, it's also complex enough to deserve good tests. Especially the deletion logic is error-prone. Finally, because the implementation is based on the well-known binary search tree, we can resort to simple reference implementations in this article.
+Implementing sorted dictionary still makes a good example for properties-driven development for various reasons. First, it shows that property-based testing is not only for functional programming but just as useful for implementing a mutable dictionary. Second, while the implementation is straight-forward, it's also complex enough to deserve good tests. Especially the deletion logic is error-prone. Finally, because the implementation is based on the well-known binary search tree, we can resort to simple reference implementations in this article.
 
 For the simplicity of this article, we assume the keys are integers and that the keys themselves are used for comparison (instead of providing a custom callable per value like `SortedDict` in `sortedcontainers` does).
 
@@ -643,6 +645,8 @@ The second line configures doctest to ignore extraneous whitespaces and exceptio
 When `pytest` is run, it now also runs the examples from the documentation.
 
 ## Conclusion
+
+**TODO**
 
 - Properties can drive development
 - Generalize examples into properties and turn properties into property-based tests
