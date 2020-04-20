@@ -111,16 +111,11 @@ The above generator is an example of a "bottom-up" approach to data generation. 
 
 ## Example project: sorted dictionary
 
-- Implement our own dictionary keeping keys in sorted order
-- Keys and values kept in a binary search tree
-- Insertions, searches, deletions O(lg n) on average
-- Unbalanced, you should use [`sortedcontainers`](https://github.com/grantjenks/python-sortedcontainers/) for anything real
+As an example project, we'll build our own **sorted dictionary** that keeps its keys in sorted order. Such a `SortedDict` might be useful for keeping, for example, users in the order they logged into your application.
 
-Why this?
+We implement the sorting using a standard [binary search tree](https://en.wikipedia.org/wiki/Binary_search_tree) built by ourselves. Because the tree is unbalanced, the worst-case running time of search, insert and delete operations is `O(n)`, where `n` is the number of keys. Therefore, you should use [`sortedcontainers`](https://github.com/grantjenks/python-sortedcontainers/) for production usage.
 
-1. Property-based tests are not only for functional programming
-1. It's complex enough to possibly have tricky bugs
-1. It's simple enough to contain well-known reference implementation
+Implementing sorted dictionary makes a good example for properties-driven development for various reasons. First, it shows that PBT is not only for functional programming but just as useful for implementing a mutable dictionary. Second, while the implementation is straight-forward, it's also complex enough to deserve good tests. Especially the deletion logic is prone to logic. Finally, because the implementation is based on the well-known binary search tree, we can resort to simple reference implementations in this article.
 
 ### What should it do?
 
