@@ -111,15 +111,17 @@ The above generator is an example of a "bottom-up" approach to data generation. 
 
 ## Example project: sorted dictionary
 
-As an example project, we'll build our own **sorted dictionary** that keeps its keys in sorted order. Such a `SortedDict` might be useful for keeping, for example, users in the order they logged into your application.
+As an example project, we'll build our own **sorted dictionary** in Python. We call the datastructure `SortedDict` and expect it to always keep its keys in sorted order. Such a `SortedDict` might be useful for keeping, for example, users in the order they logged into your application. You're also able to traverse the sorted list of key-value pairs in linear time.
 
-We implement the sorting using a standard [binary search tree](https://en.wikipedia.org/wiki/Binary_search_tree) built by ourselves. Because the tree is unbalanced, the worst-case running time of search, insert and delete operations is `O(n)`, where `n` is the number of keys. Therefore, you should use [`sortedcontainers`](https://github.com/grantjenks/python-sortedcontainers/) for production usage.
+We implement the sorting using a standard [binary search tree](https://en.wikipedia.org/wiki/Binary_search_tree). While the average running time for insert, search and delete operations in binary search tree is `O(lg(n))`, where `n` is the number of keys, the worst-case running time for such operations is linear. Therefore, you should use [`sortedcontainers`](https://github.com/grantjenks/python-sortedcontainers/) for production usage.
 
-Implementing sorted dictionary makes a good example for properties-driven development for various reasons. First, it shows that PBT is not only for functional programming but just as useful for implementing a mutable dictionary. Second, while the implementation is straight-forward, it's also complex enough to deserve good tests. Especially the deletion logic is prone to logic. Finally, because the implementation is based on the well-known binary search tree, we can resort to simple reference implementations in this article.
+Implementing sorted dictionary makes a good example for properties-driven development for various reasons. First, it shows that PBT is not only for functional programming but just as useful for implementing a mutable dictionary. Second, while the implementation is straight-forward, it's also complex enough to deserve good tests. Especially the deletion logic is error-prone. Finally, because the implementation is based on the well-known binary search tree, we can resort to simple reference implementations in this article.
+
+For the simplicity of this article, we assume the keys are integers and that the keys themselves are used for comparison (instead of providing a custom callable per value like `SortedDict` in `sortedcontainers` does).
 
 ### What should it do?
 
-To come up with properties, the first step is to play around with the expected API of your implementation and try to generalize that. For simplicity of presentation, we assume the keys are integers and that the keys are always used for comparison (instead of providing a custom callable per value).
+To come up with properties, we first need to come up with the requirements for our `SortedDict`. To do that, we'll first simply play around with the expected API.
 
 First, we probably expect we can search for an inserted key:
 
@@ -140,7 +142,7 @@ We also expect keys are always sorted irrespective of the insertion order (we're
 >>> [1, 2]
 ```
 
-Like with dictionary, we expect re-inserting an existing key will result in the value being overwritten:
+Like with the standard dictionary, we expect re-inserting an existing key will result in the value being overwritten:
 
 ```python
 >>> # Handles duplicate keys
@@ -178,7 +180,7 @@ Now that we have a grasp for what we expect our code to do, we can try to genera
 1. Searching for non-existing key raises `KeyError`.
 1. Deleting a key and then searching it raises `KeyError`
 
-Such requirements serve as the basis for **properties**. We'll first write a property for the first requirement: one can insert key-value pairs into the dictionary and then search for them.
+Such requirements serve as the basis for **properties**. Next, we'll first write a property for the first requirement: one can insert key-value pairs into the dictionary and then search for them.
 
 ## Coding the first property
 
