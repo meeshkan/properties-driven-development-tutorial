@@ -109,15 +109,6 @@ Can you see how many tricky cases our generator forces us to cover? The list of 
 
 The above generator is an example of a "bottom-up" approach to data generation. Instead of generating totally random CSVs, we generate them bottom-up, keeping track of what goes in so that we know what our expected result is. This avoids the problem where you need to duplicate the implementation in your tests. For example, with the generator above, we know the length of the resulting JSON array should be equal to the non-negative integer drawn at step 2. number of rows we generated. That's a good property!
 
-In short, this is the process
-
-1. Play around with the user-facing API of your code
-2. Generalize your examples into properties
-3. Pick a property
-4. Code the properties, ensuring generators work as expected (possibly even writing tests for your generators)
-5. Implement actual code. Don't be afraid to tweak the property.
-6. If everything looks good and there are properties left, go to 3. If your examples or properties need re-thinking, go to 1.
-
 ## Example project: sorted dictionary
 
 - Implement our own dictionary keeping keys in sorted order
