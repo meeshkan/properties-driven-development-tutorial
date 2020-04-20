@@ -184,12 +184,14 @@ Such requirements serve as the basis for **properties**. Next, we'll first write
 
 ## Coding the first property
 
-Introduce Hypothesis.
+We'll use the [Hypothesis](https://hypothesis.readthedocs.io/) library for writing properties for our sorted dictionary. Hypothesis supports generating [almost any kind of data](https://hypothesis.readthedocs.io/en/latest/data.html) you can imagine and provides simple decorators for writing property-based testing.
 
-### Coding the generator
+To get started, we need to write a generator for key-value tuples. Here's how it can be done in Hypothesis:
 
 ```python
 # test_sorted_dict.py
+import hypothesis.strategies as some
+
 def some_key_value_tuples():
     """
     Generator for lists of key-value tuples.
@@ -200,28 +202,57 @@ def some_key_value_tuples():
     return some.lists(some_kvs)
 ```
 
+We alias `hypothesis.strategies` as `some` as it reads nicely. First we define a generator for keys, which we assume to be integers. For values, we assume any binary is valid. We then create a generator for key-value tuples and finally a generator of lists of tuples.
+
+To see what data this generator can generate, we can call `some_key_value_tuples().example()`:
+
+```python
+>>> some_key_value_tuples().example()
+[]
+>>> some_key_value_tuples().example()
+[(53, b'{\x8b\xed\x92\xa8\xcb\x7fq\x95')]
+>>> some_key_value_tuples().example()
+[(-19443, b'\x16ERa'), (-425, b'')]
+```
+
+Having a generator for lists of key-value tuples, we wish to build a `SortedDict` instance containing those tuples. In Hypothesis, you can use [`hypothesis.strategies.composite`](https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.composite) to compose generators as follows:
+
 ```python
 # test_sorted_dict.py
 @some.composite
 def some_sorted_dicts(draw):
     """
-    Generator of sorted dicts along with the dictionary of
-    key-value pairs used for constructing it.
+    Generator of sorted dicts.
     """
     key_values = draw(some_key_value_tuples())
 
     sorted_dict = SortedDict()
     for key, val in key_values:
         sorted_dict[key] = val
+    return sorted_dict
+```
 
-    # Put the keys you expect to find in sorted_dict
-    # in a dictionary for comparison.
+The `draw` function injected by `composite` can be used to draw values from another generator to derive new data. Above, we draw a list of key-value tuples and then insert of key-value pairs into our `SortedDict` (we define `SortedDict` in a moment).
+
+While `some_sorted_dicts` defined above generates instances of `SortedDict`, there's a problem: we don't know what data went into creating the sorted dictionary. To do that, we'll store the key-value pairs in a standard Python dictionary as follows:
+
+```python
+# test_sorted_dict.py
+@some.composite
+def some_sorted_dicts(draw):
+    """
+    Generator of sorted dicts. Returns a tuple of the sorted dictionary and a dictionary holding the key-value pairs used for data generation.
+    """
+    # ... define sorted_dict as as above
+
     expected = {}
     for key, val in key_values:
         expected[key] = val
 
     return sorted_dict, expected
 ```
+
+The variable `expected` contains the key-value pairs we expect to find from our sorted dictionary.
 
 ### Coding the property
 
