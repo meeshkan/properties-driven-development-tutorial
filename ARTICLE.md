@@ -186,7 +186,26 @@ Such requirements serve as the basis for **properties**. Next, we'll first write
 
 We'll use the [Hypothesis](https://hypothesis.readthedocs.io/) library for writing properties for our sorted dictionary. Hypothesis supports generating [almost any kind of data](https://hypothesis.readthedocs.io/en/latest/data.html) you can imagine and provides simple decorators for writing property-based testing.
 
-To get started, we need to write a generator for key-value tuples. Here's how it can be done in Hypothesis:
+To be able to write properties, we first write the basic skeleton for `SortedDict`:
+
+```python
+# sorted_dict.py
+class SortedDict:
+    def __init__(self):
+        pass
+
+    def __setitem__(self, key, item):
+        pass
+
+    def __getitem__(self, key):
+        pass
+```
+
+The `__setitem__` method is called when `sorted_dict[key] = item` is invoked. Similarly, `__getitem__` defines the behaviour for `sorted_dict[key]`.
+
+Before going any further in the implementation, we write down the property. Proceeding one step at a time like this is a good way to ensure your tests work as expected: once you're done writing a test, make sure it fails before getting into implementation.
+
+To get started with the property, we need a generator of key-value tuples. Here's how to do it in Hypothesis:
 
 ```python
 # test_sorted_dict.py
@@ -202,7 +221,7 @@ def some_key_value_tuples():
     return some.lists(some_kvs)
 ```
 
-We alias `hypothesis.strategies` as `some` as it reads nicely. First we define a generator for keys, which we assume to be integers. For values, we assume any binary is valid. We then create a generator for key-value tuples and finally a generator of lists of tuples.
+We alias `hypothesis.strategies` as `some` as it reads nicely. The function first defines a generator `some_keys` for keys, which we assume to be integers. For values, we assume any binary is valid. We then create a generator of key-value tuples and, using that, a generator of lists of tuples.
 
 To see what data this generator can generate, we can call `some_key_value_tuples().example()`:
 
@@ -252,12 +271,16 @@ def some_sorted_dicts(draw):
     return sorted_dict, expected
 ```
 
-The variable `expected` contains the key-value pairs we expect to find from our sorted dictionary.
+The variable `expected` contains the key-value pairs we expect to find from our sorted dictionary. It acts as a simplified "model" for sorted dictionary with the exception that its keys are not sorted. Using a standard dictionary as the model is useful also because it handles duplicates in the same way as we expect `SortedDict` to handle them (overwrite).
 
 ### Coding the property
 
+Having the test case generator `some_sorted_dicts` defined, we're ready to state our first property: that any keys inserted into the dictionary can be searched.
+
 ```python
 # test_sorted_dict.py
+from hypothesis import given
+
 @given(dict_and_values=some_sorted_dicts())
 def test_insert_and_search(dict_and_values):
     """
@@ -267,10 +290,12 @@ def test_insert_and_search(dict_and_values):
 
     for key, value in expected.items():
         in_dict = sorted_dict[key]
-        assert in_dict == value, "Expected {} for key {}, got {}".format(
-            value, key, in_dict
-        )
+        assert in_dict == value
 ```
+
+Test case is marked as Hypothesis test with the `@given` decorator. When this test is run, Hypothesis will generate 100 different sorted dictionaries and verify that all key-value pairs expected to be found in the dictionary are found.
+
+If we run the tests now, they should fail: we need to implement `__setitem__` and `__getitem_`. For those, we need the binary search tree.
 
 ## Making the property pass
 
