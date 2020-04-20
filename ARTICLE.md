@@ -68,9 +68,50 @@ This [GitHub repository](https://github.com/meeshkan/properties-driven-developme
 
 ## Properties-driven development 101
 
-In short, this is how I understand the process to work:
+Properties-driven development is essentially test-driven development in the context of property-based testing. Like in test-driven development, you first think what your code should do and put that into a test. But instead of having that test be a single example of input and output, you instead try to write _properties_ for what your code is doing.
 
-1. Imagine how your code would be used
+For example, assume you're writing code for converting a [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) into a [JSON](https://en.wikipedia.org/wiki/JSON) array. Instead of jumping into writing a CSV parser, test-driven development first asks you to come up with test cases. Here's an example input:
+
+```csv
+a,b,c
+3,2,1
+6,3,2
+```
+
+This should be turned into a the following JSON:
+
+```json
+[
+  { "a": 3, "b": 2, "c": 1 },
+  { "a": 6, "b": 3, "c": 2 }
+]
+```
+
+This would make a nice unit test for your code, and so you're good to go implementing it! However, the test has some assumptions baked within:
+
+- Keys are distinct
+- Values are integers
+- There are no missing values
+
+Being a good developer you are, you would of course go on writing unit tests to cover each of those assumptions with the behaviour you want.
+
+The bad news is our imagination is limited: it's all too easy to accidentally skip assumptions you made in generating your example inputs. For example, above we did not mention whether our parser works when the CSV is empty or when the CSV only has the header row.
+
+Property-based tests are excellent for forcing you to think slowly and to be **explicit about your assumptions**.
+
+To come up with properties for our CSV-to-JSON parser, we would need to first generate CSVs we expect to be valid. Here's one generator:
+
+1. Generate keys: a list of arbitrary strings,
+1. Generate the number of rows: a non-negative integer,
+1. Generate rows: For each row and key, generate an arbitrary string value.
+
+Can you see how many tricky cases our generator forces us to cover? The list of keys may be empty, the number of rows may be zero, and we assume our code works with arbitrary strings (including empty strings) both as keys and values. Generator as above pushes the boundaries of your parser.
+
+The above generator is an example of a "bottom-up" approach to data generation. Instead of generating totally random CSVs, we generate them bottom-up, keeping track of what goes in so that we know what our expected result is. This avoids the problem where you need to duplicate the implementation in your tests. For example, with the generator above, we know the length of the resulting JSON array should be equal to the non-negative integer drawn at step 2. number of rows we generated. That's a good property!
+
+In short, this is the process
+
+1. Play around with the user-facing API of your code
 2. Generalize your examples into properties
 3. Pick a property
 4. Code the properties, ensuring generators work as expected (possibly even writing tests for your generators)
