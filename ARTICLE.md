@@ -1,6 +1,6 @@
 ---
 title: Introduction to properties-driven development
-description: We'll teach you what property-driven development is is and how to apply it for a project.
+description: Learn what property-driven development is and how to apply it for a project.
 slug: introduction-to-properties-driven-development
 date: 2020-04-17
 authors: ["kimmo"]
@@ -13,11 +13,13 @@ tags:
 
 > _This article was edited by [Carolyn Stransky](https://dev.to/carolstran). XXX and XXX are acknowledged for their valuable feedback._
 
-I love software development. So when I'm given an interesting coding task, my brain immediately goes in development mode and generates a vague idea what the implementation should look like. Based on that idea, I would like to get right to implementing it, garnering better understanding of the problem along the way. Once the thing is done and problem is solved, I may add a few unit tests to make the reviewer happy.
+In his book [Thinking, Fast and Slow](), Daniel Kahneman describes the two modes of thought our brain uses. The first one is fast, instinctive, and emotional, and the second one is slower, more deliberative and more logical. The second mode is generally more appropriate for solving complex tasks.
 
-While this approach could be productive for very experienced developers, for most of us it will probably lead to a lot of waste. Why? Because when coding new features, you're thinking like an engineer, not like a user.
+Imagine you're given an interesting coding task. It's likely that the fast mode of your thought activates. Based on years of experience of software development, your brain generates an idea of what the implementation should look like, and,b ased on that idea, it would be very tempting to jump into implementing it.
 
-How to think like a user? By writing tests. Tests are the first users of your code. It's not important whether you write tests before, during, or after the actual implementation, but they should guide the development. The authors of the [Pragmatic Programmer]() even go so far to say that _testing is not about finding bugs_.
+To avoid the fast mode taking over, you should slow down and think about the problem. What is the actual problem you're trying to solve? How is the user expected to gain value from your solution? For this, you need to think like a _user, not a developer_.
+
+In day-to-day work, one tested way to think like a user is to write tests. Lots of tests. Tests are the first users of your code. It's not important whether you write tests before, during, or after the actual implementation, but they should guide the development. The authors of the [Pragmatic Programmer]() even go so far to say that _testing is not about finding bugs_.
 
 However, writing good tests is hard. It may be easy to come up with happy-path examples where things just work, but it's much harder to come up with test cases stretching the boundaries of your code. Also, it's common have unconscious assumptions about your code that you put in your tests: You may test your code with "foo" and "bar" and therefore conclude it works with any String, but it might actually break horribly when fed with `"\U000f28d4\U0006ef7d"`.
 
