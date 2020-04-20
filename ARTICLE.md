@@ -341,7 +341,9 @@ class Node:
         )
 ```
 
-A node has a key and a value. It also contains references to its left and right children as well as its parent. Note that `parent` is not included in `__repr__` to avoid infinite loops (printing a child prints the parent, which prints the child...).
+A node has a key and a value. It also contains references to its left and right children as well as its parent. Note that `parent` is not included in `__repr__` to avoid infinite loops (printing a child prints the parent, which prints the child, which prints the parent...).
+
+Inserting key and a value to the tree happens as follows:
 
 ```python
 # tree.py
@@ -352,8 +354,6 @@ def insert(tree: Tree, key, value):
     """
     y = None
     x = tree.root
-
-    log.debug("Inserting key=%d, value=%s", key, value)
 
     while x is not None:
         y = x
@@ -373,6 +373,10 @@ def insert(tree: Tree, key, value):
     else:
         y.right = z
 ```
+
+Note that if key is equal to an existing key, the value in the corresponding node is updated in-place.
+
+Searching from the tree is straightforward, going down the tree until finding a match or, if no match is found, raising `KeyError`:
 
 ```python
 # tree.py
@@ -398,7 +402,11 @@ def _search_node(tree: Tree, key) -> Node:
     raise KeyError("Key {} not found".format(key))
 ```
 
+Search involves a helper function that searches a `Node` by key. We'll need this when implementing deletion.
+
 ### Sorted dictionary
+
+With the tree supporting insert and search, we can use the tree in our `SortedDict`:
 
 ```python
 # sorted_dict.py
@@ -414,6 +422,16 @@ class SortedDict:
     def __getitem__(self, key):
         return tree.search(self._tree, key)
 ```
+
+If we now run the property-based test for insertion and search, we should see it pass with flying colors!
+
+We have now implemented the first requirement with a property-based test. Let's take a look at our remaining requirements:
+
+1. ~~Key-value pairs added to sorted dictionary can be searched.~~
+1. Adding key that exists overwrites the existing one.
+1. Keys are always sorted.
+1. Searching for non-existing key raises `KeyError`.
+1. Deleting a key and then searching it raises `KeyError`
 
 ## Handling deletion
 
