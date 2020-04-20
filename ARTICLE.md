@@ -433,13 +433,21 @@ We have now implemented the first requirement with a property-based test. Let's 
 1. Searching for non-existing key raises `KeyError`.
 1. Deleting a key and then searching it raises `KeyError`
 
+We could also consider requirement 2 be checked if we trust Hypothesis to generate duplicate keys. We could work on the requirement of keeping keys sorted, but we actually want that to hold also after deletions, as that's the trickiest operation. We'll therefore handle requirement 5 next.
+
 ## Handling deletion
+
+The requirement states that searching for a deleted key raises `KeyError`. How can we put that into a property? An easy way is to use our `some_sorted_dicts()` generator from above and let Hypothesis draw one of the keys for deletion. We then delete that key and ensure searching raises `KeyError`.
+
+To draw a key to delete, we could again use `composite` to create a composite strategy yielding a sorted dictionary, the dictionary of expected contents, and a key to delete. However, in this case it's simpler to use [`data`](https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.data) strategy from Hypothesis to draw _during the test_.
+
+Here's what that would look like:
 
 ```python
 # test_sorted_dict.py
 
 @given(
-    dict_and_values=some_sorted_dicts().filter(lambda drawn: len(drawn[1].keys()) > 0),
+    dict_and_values=some_sorted_dicts(),
     data=some.data(),
 )
 def test_search_after_delete(dict_and_values, data):
@@ -448,11 +456,31 @@ def test_search_after_delete(dict_and_values, data):
     """
     sorted_dict, expected = dict_and_values
     inserted_keys = list(expected.keys())
-    key_to_delete = data.draw(some.sampled_from(inserted_keys), label="Key to delete")
+    some_key = some.sampled_from(inserted_keys)
+    key_to_delete = data.draw(some_key, label="Key to delete")
     del sorted_dict[key_to_delete]
     with pytest.raises(KeyError):  # type: ignore
         sorted_dict[key_to_delete]
 ```
+
+We first create a generator `some_key` for sampling from the list of inserted keys. We can then use `data.draw()` to draw from the generator interactively. Once a key is drawn, we delete the key and verify searching for it raises `KeyError`.
+
+However, there's one problem in our implementation. The list of inserted keys may be empty. We need to cover for that case by ensuring the test only runs for non-empty dictionaries. We can do that by using `filter` in our generator:
+
+```python
+# test_sorted_dict.py
+
+@given(
+    dict_and_values=some_sorted_dicts().filter(lambda drawn: len(drawn[1]) > 0),
+    data=some.data(),
+)
+def test_search_after_delete(dict_and_values, data):
+    ...
+```
+
+The filter ensures that the dictionary is non-empty.
+
+With the property ready, we can move to implementation. The `del sorted_dict[key]` actually means `sorted_dict.__delitem__(key)`, so we define `__delitem__` in `SortedDict`:
 
 ```python
 # sorted_dict.py
@@ -462,7 +490,15 @@ class SortedDict:
         return tree.delete(self._tree, key)
 ```
 
-The implementation of `tree.delete` is left as an exercise to the reader.
+We again delegate the deletion to the tree with `tree.delete` function. Because the deletion is somewhat tricky but standard, we refer to the accompanying repository for its implementation.
+
+Our list of requirements now looks as following:
+
+1. ~~Key-value pairs added to sorted dictionary can be searched.~~
+1. ~~Adding key that exists overwrites the existing one.~~
+1. Keys are always sorted.
+1. Searching for non-existing key raises `KeyError`.
+1. ~~Deleting a key and then searching it raises `KeyError`~~
 
 ## Coding invariant
 
