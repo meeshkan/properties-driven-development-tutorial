@@ -33,7 +33,7 @@ Properties-driven development is an approach that lets properties guide coding. 
 - Example project: sorted dictionary
 
   - What should it do?
-  - Coming up with properties
+  - Listing requirements
 
 - Coding the first property
 
@@ -119,43 +119,66 @@ Implementing sorted dictionary makes a good example for properties-driven develo
 
 ### What should it do?
 
+To come up with properties, the first step is to play around with the expected API of your implementation and try to generalize that. For simplicity of presentation, we assume the keys are integers and that the keys are always used for comparison (instead of providing a custom callable per value).
+
+First, we probably expect we can search for an inserted key:
+
 ```python
 >>> # Insert and search
 >>> sorted_dict = SortedDict()
 >>> sorted_dict[2] = 'two'
 >>> sorted_dict[2]
 'two'
->>> # Handles duplicate keys
->>> sorted_dict[2] = 'two-two'
->>> 'two-two'
->>> # Multiple keys
->>> sorted_dict[1] = 'one'
->>> sorted_dict.keys()
-[1, 2]
->>> # Minimum key
->>> sorted_dict.min()
-1
->>> # Non-existing key
->>> sorted_dict[3]
-Traceback (most recent call last):
-KeyError: ...
-### Deleting key
->>> del sorted_dict[1]
->>> sorted_dict[1]
-Traceback (most recent call last):
-KeyError: ...
 ```
 
-### Coming up with properties
+We also expect keys are always sorted irrespective of the insertion order (we're not building [`OrderedDict`](https://docs.python.org/3.8/library/collections.html#collections.OrderedDict)!). Continuing on above:
+
+```python
+>>> # Keys are sorted
+>>> sorted_dict[1] = 'one'
+>>> sorted_dict.keys()
+>>> [1, 2]
+```
+
+Like with dictionary, we expect re-inserting an existing key will result in the value being overwritten:
+
+```python
+>>> # Handles duplicate keys
+>>> sorted_dict[2] = 'two-two'
+>>> sorted_dict[2]
+>>> 'two-two'
+```
+
+We expect searching for a non-existing key raises `KeyError`:
+
+```python
+>>> # Non-existing key
+>>> sorted_dict[3]
+>>> Traceback (most recent call last):
+>>> KeyError: ...
+```
+
+Finally, if we delete a key, we know searching for it will raise a `KeyError`:
+
+```python
+>>> # Searching for deleted key
+>>> del sorted_dict[1]
+>>> sorted_dict[1]
+>>> Traceback (most recent call last):
+>>> KeyError: ...
+```
+
+### Listing requirements
+
+Now that we have a grasp for what we expect our code to do, we can try to generalize the examples above into requirements:
 
 1. Key-value pairs added to sorted dictionary can be searched.
 1. Adding key that exists overwrites the existing one.
-1. Keys are sorted.
-1. Searching for minimum key returns the smallest key.
+1. Keys are always sorted.
 1. Searching for non-existing key raises `KeyError`.
 1. Deleting a key and then searching it raises `KeyError`
 
-- Restrict keys to integers for simplicity. In general, anything hashable works.
+Such requirements serve as the basis for **properties**. We'll first write a property for the first requirement: one can insert key-value pairs into the dictionary and then search for them.
 
 ## Coding the first property
 
