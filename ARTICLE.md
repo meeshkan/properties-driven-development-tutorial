@@ -43,16 +43,16 @@ Properties-driven development is an approach that lets properties guide coding. 
   - Binary search tree
   - Sorted dictionary
 
+- Handling deletion
+
 - Coding invariant
 
-- Handling deletion
+- Stateful testing
 
 - Final touch: add `doctest`
 
-- Bonus: stateful testing
-
-- [Conclusion](#conclusion)
-- [Resources](#resources)
+* [Conclusion](#conclusion)
+* [Resources](#resources)
 
 ⚠️ **Prerequisites**:
 
@@ -297,6 +297,37 @@ class SortedDict:
         return tree.search(self._tree, key)
 ```
 
+## Handling deletion
+
+```python
+# test_sorted_dict.py
+
+@given(
+    dict_and_values=some_sorted_dicts().filter(lambda drawn: len(drawn[1].keys()) > 0),
+    data=some.data(),
+)
+def test_search_after_delete(dict_and_values, data):
+    """
+    Searching a key after deleting the key raises KeyError.
+    """
+    sorted_dict, expected = dict_and_values
+    inserted_keys = list(expected.keys())
+    key_to_delete = data.draw(some.sampled_from(inserted_keys), label="Key to delete")
+    del sorted_dict[key_to_delete]
+    with pytest.raises(KeyError):  # type: ignore
+        sorted_dict[key_to_delete]
+```
+
+```python
+# sorted_dict.py
+class SortedDict:
+    ...
+    def __delitem__(self, key):
+        return tree.delete(self._tree, key)
+```
+
+The implementation of `tree.delete` is left as an exercise to the reader.
+
 ## Coding invariant
 
 ```python
@@ -346,37 +377,6 @@ def _collect(node: t.Optional[Node]):
         yield key, value
 ```
 
-## Handling deletion
-
-```python
-# test_sorted_dict.py
-
-@given(
-    dict_and_values=some_sorted_dicts().filter(lambda drawn: len(drawn[1].keys()) > 0),
-    data=some.data(),
-)
-def test_search_after_delete(dict_and_values, data):
-    """
-    Searching a key after deleting the key raises KeyError.
-    """
-    sorted_dict, expected = dict_and_values
-    inserted_keys = list(expected.keys())
-    key_to_delete = data.draw(some.sampled_from(inserted_keys), label="Key to delete")
-    del sorted_dict[key_to_delete]
-    with pytest.raises(KeyError):  # type: ignore
-        sorted_dict[key_to_delete]
-```
-
-```python
-# sorted_dict.py
-class SortedDict:
-    ...
-    def __delitem__(self, key):
-        return tree.delete(self._tree, key)
-```
-
-The implementation of `tree.delete` is left as an exercise to the reader.
-
 ## Final touch: add doctest
 
 ```ini
@@ -388,7 +388,7 @@ doctest_optionflags= NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL
 
 Tests now also collect the doctest from `sorted_dict.py`!
 
-## Bonus: stateful testing
+## Stateful testing
 
 How to test complex states? You need stuff like this:
 
