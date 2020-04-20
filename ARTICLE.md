@@ -13,9 +13,9 @@ tags:
 
 > _This article was edited by [Carolyn Stransky](https://dev.to/carolstran). XXX and XXX are acknowledged for their valuable feedback._
 
-In his book [Thinking, Fast and Slow](), Daniel Kahneman describes the two modes of thought our brain uses. The first one is fast, instinctive, and emotional, and the second one is slower, more deliberative and more logical. The second mode is generally more appropriate for solving complex tasks.
+In his book [Thinking, Fast and Slow](), Daniel Kahneman describes the two modes of thought our brain uses. The first one is fast, instinctive, and emotional, and the second one is slower, more deliberate and more logical. The slow thinking mode is generally more appropriate for solving complex tasks.
 
-Imagine you're given an interesting coding task. It's likely that the fast mode of your thought activates. Based on years of experience of software development, your brain generates an idea of what the implementation should look like, and,b ased on that idea, it would be very tempting to jump into implementing it.
+Imagine you're given an interesting coding task. It's likely that the fast mode of thought activates. Based on years of experience of software development, your brain generates an idea of what the implementation should look like, and, based on that idea, it would be very tempting to jump into implementing it.
 
 To avoid the fast mode taking over, you should slow down and think about the problem. What is the actual problem you're trying to solve? How is the user expected to gain value from your solution? For this, you need to think like a _user, not a developer_.
 
@@ -596,6 +596,43 @@ Stateful tests such as above can work wonders for revealing tricky bugs in your 
 
 ## Final touch: add doctest
 
+Remember how we played around with the expected API of our `SortedDict` to come up with the properties? For example, we assumed the following would hold:
+
+```python
+>>> # Insert and search
+>>> sorted_dict = SortedDict()
+>>> sorted_dict[2] = 'two'
+>>> sorted_dict[2]
+'two'
+```
+
+It would be great to ensure these simple examples hold also for our implementation. Writing properties can sometimes be complex and error-prone, so it's very valuable to have such human-readable examples serve as "anchors". They ensure that no matter what happens, our code works as expected at least with the simplest example inputs.
+
+Such tests serve as documentation, and therefore they make excellent [doctests](https://docs.python.org/3/library/doctest.html). We can add the tests at the top of our `sorted_dict.py` module in a docstring:
+
+```python
+# sorted_dict.py
+"""
+Sorted, mutable dictionary
+keeping keys in sorted order.
+
+Examples:
+
+>>> # Insert and search
+>>> sorted_dict = SortedDict()
+>>> sorted_dict[2] = 'two'
+>>> sorted_dict[2]
+'two'
+>>> # Handles duplicate keys
+>>> sorted_dict[2] = 'two-two'
+>>> sorted_dict[2]
+'two-two'
+...
+"""
+```
+
+In `pytest`, we can enable doctests with the `--doctest-modules` flag. Add the following in `pytest.ini` to always run doctests:
+
 ```ini
 # pytest.ini
 [pytest]
@@ -603,7 +640,9 @@ addopts = --doctest-modules
 doctest_optionflags= NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL
 ```
 
-Tests now also collect the doctest from `sorted_dict.py`!
+The second line configures doctest to ignore extraneous whitespaces and exception details.
+
+When `pytest` is run, it now also runs the examples from the documentation.
 
 ### Conclusion
 
