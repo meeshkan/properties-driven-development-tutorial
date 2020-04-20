@@ -500,7 +500,11 @@ Our list of requirements now looks as following:
 1. Searching for non-existing key raises `KeyError`.
 1. ~~Deleting a key and then searching it raises `KeyError`~~
 
+As our last example, we write a property for the keys being always sorted.
+
 ## Coding invariant
+
+A property such as "Keys are always sorted" is an invariant: Whatever operations are performed, it remains true. Ensuring all the dictionaries we generate have sorted keys is straightforward:
 
 ```python
 # test_sorted_dict.py
@@ -514,69 +518,28 @@ def test_keys_sorted(dict_and_values):
     assert keys == sorted(keys)
 ```
 
-```python
-# sorted_dict.py
-class SortedDict:
-    ...
-    def keys(self):
-        return list(self.keys_())
+Again, we refer the implementation to the accompanying repository.
 
-    def keys_(self):
-        for key, _ in tree.collect(self._tree)
-            yield key
-```
-
-```python
-# tree.py
-def collect(tree: Tree):
-    if tree.root is None:
-        return ()
-
-    return _collect(tree.root)
-
-
-def _collect(node: t.Optional[Node]):
-
-    if node is None:
-        return
-
-    for key, value in _collect(node.left):
-        yield key, value
-
-    yield node.key, node.value
-
-    for key, value in _collect(node.right):
-        yield key, value
-```
-
-## Final touch: add doctest
-
-```ini
-# pytest.ini
-[pytest]
-addopts = --doctest-modules
-doctest_optionflags= NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL
-```
-
-Tests now also collect the doctest from `sorted_dict.py`!
-
-## Stateful testing
-
-How to test complex states? You need stuff like this:
+While the property above ensures that keys are always sorted after inserting keys, the property should also be checked after deletion. Therefore, we should also check the invariant holds in our deletion property above:
 
 ```python
 # test_sorted_dict.py
+
+@given(
+    dict_and_values=some_sorted_dicts().filter(lambda drawn: len(drawn[1]) > 0),
+    data=some.data(),
+)
 def test_search_after_delete(dict_and_values, data):
     ...
-
-    remaining_keys = sorted_dict.keys()
-
-    assert len(remaining_keys) == len(inserted_keys) - 1
-
-    assert remaining_keys == sorted(remaining_keys)
+    keys = sorted_dict.keys()
+    assert keys == sorted(keys)
 ```
 
-Enter stateful testing:
+While this works, there's something unsatisfactory about it. The premise of property-based testing is that we can cover all kinds of unexpected cases. Here, we're hard-coding the cases where the invariant should be tested. Is there something we can do to randomize testing the invariant?
+
+Enter [stateful testing](https://hypothesis.readthedocs.io/en/latest/stateful.html). With stateful tests, you define operations that can be run but leave their order for the framework to decide.
+
+In Hypothesis, you use [`RuleBasedStateMachine`]() for that. We won't go into details, but here's an example for `SortedDict`:
 
 ```python
 # test_sorted_dict.py
@@ -594,7 +557,6 @@ class StatefulDictStateMachine(RuleBasedStateMachine):
         event("Inserting key")
         self.sorted_dict[key] = value
         self.state[key] = value
-
         return key
 
     @rule(key=inserted_keys)
@@ -628,17 +590,20 @@ class StatefulDictStateMachine(RuleBasedStateMachine):
 TestStatefulDict = StatefulDictStateMachine.TestCase
 ```
 
-```bash
-$ pytest -s -k TestStateful --hypothesis-show-statistics
-... lots of output
-  - Events:
-    ...
-    *  55.80%, Inserting key
-    *  50.72%, Searching non-existing key
-    *  31.16%, Deleting key
-    ...
-    *  17.39%, Searching existing key
+The methods defined in our `RuleBasedStateMachine` decorated with `@rule` define the "commands" the state machine runs. The decorator `@invariant` ensures that the keys being sorted is checked after every command. We also keep a "model" of our current expected state in `self.state` to know what keys our `SortedDict` is expected to contain.
+
+Stateful tests such as above can work wonders for revealing tricky bugs in your code. They can, however, be very hard to debug, so always try to cover as many cases as possible with regular unit and property-based tests.
+
+## Final touch: add doctest
+
+```ini
+# pytest.ini
+[pytest]
+addopts = --doctest-modules
+doctest_optionflags= NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL
 ```
+
+Tests now also collect the doctest from `sorted_dict.py`!
 
 ### Conclusion
 
