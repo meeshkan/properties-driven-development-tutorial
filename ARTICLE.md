@@ -646,14 +646,13 @@ When `pytest` is run, it now also runs the examples from the documentation.
 
 ## Conclusion
 
-**TODO**
+In this article, we learned how to apply property-based testing in the context of test-driven development and how to apply it to developing a sorted dictionary. Thinking in properties instead of concrete examples can help you slow down and be precise about what your code is expected to do and what not. However, remember that property-based testing _does not replace regular unit tests_: instead, it provides a new tool to our testing toolboxes. Sometimes, property-based testing is simply not the right tool for the job: for an interesting article on when property-based testing shines, take a look at this [article](https://medium.com/erlang-battleground/property-based-testing-erlang-elixir-de72ad24966b).
 
-- Properties can drive development
-- Generalize examples into properties and turn properties into property-based tests
-- Positive vs. negative testing
+Thank you for reading, as always I would be happy to hear your feedback!
 
 ### Resources
 
 - [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/): Excellent book on property-based testing with a chapter on properties-driven development
 - [From 1 to 10,000 test cases in under an hour: A beginner's guide to property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8): Guide to PBT from my colleagues Carolyn and Fredrik
-- [Hypothesis Quick Start guide](https://hypothesis.readthedocs.io/en/latest/quickstart.html): Get started with property-based testing with Hypothesis
+- [Hypothesis Quick Start guide](https://hypothesis.readthedocs.io/en/latest/quickstart.html): Get started with property-based testing with Hypothesis in Python
+- [My Take on Property-Based Testing](https://medium.com/erlang-battleground/property-based-testing-erlang-elixir-de72ad24966b): Insights on when to use property-based testing
