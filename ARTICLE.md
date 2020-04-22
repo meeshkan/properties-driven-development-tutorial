@@ -656,3 +656,4 @@ Thank you for reading, as always I would be happy to hear your feedback!
 - [From 1 to 10,000 test cases in under an hour: A beginner's guide to property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8): Guide to PBT from my colleagues Carolyn and Fredrik
 - [Hypothesis Quick Start guide](https://hypothesis.readthedocs.io/en/latest/quickstart.html): Get started with property-based testing with Hypothesis in Python
 - [My Take on Property-Based Testing](https://medium.com/erlang-battleground/property-based-testing-erlang-elixir-de72ad24966b): Insights on when to use property-based testing
+- [Property-Based Test-Driven Development in Elixir](https://medium.com/grandcentrix/property-based-test-driven-development-in-elixir-49cc70c7c3c4): Mathias Polligkeit's article on properties-driven development
