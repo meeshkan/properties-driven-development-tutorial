@@ -1,4 +1,5 @@
-"""Binary search tree.
+"""
+Binary search tree.
 """
 
 from dataclasses import dataclass

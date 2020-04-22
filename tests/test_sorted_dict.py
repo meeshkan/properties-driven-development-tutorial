@@ -6,7 +6,8 @@ import pytest
 
 
 def some_key_value_tuples():
-    """Generator for lists of key-value tuples.
+    """
+    Generator for lists of key-value tuples.
     """
     some_keys = some.integers()
     some_values = some.binary()
@@ -16,8 +17,10 @@ def some_key_value_tuples():
 
 @some.composite
 def some_sorted_dicts(draw):
-    """Generator of sorted dicts along with the dictionary of
-    key-value pairs used for constructing it."""
+    """
+    Generator for sorted dicts along with the dictionary of
+    key-value pairs used for constructing it.
+    """
     key_values = draw(some_key_value_tuples())
 
     sorted_dict = SortedDict()
@@ -35,7 +38,9 @@ def some_sorted_dicts(draw):
 
 @given(dict_and_values=some_sorted_dicts())
 def test_insert_and_search(dict_and_values):
-    """Key-value pairs added to sorted dictionary can be searched."""
+    """
+    Key-value pairs added to the sorted dictionary can be searched.
+    """
     sorted_dict, expected = dict_and_values
 
     for key, value in expected.items():
@@ -47,7 +52,9 @@ def test_insert_and_search(dict_and_values):
 
 @given(dict_and_values=some_sorted_dicts())
 def test_keys_sorted(dict_and_values):
-    """Invariant: keys in sorted dictionary are sorted."""
+    """
+    Invariant: Keys in the sorted dictionary are sorted.
+    """
     sorted_dict, _ = dict_and_values
     keys = sorted_dict.keys()
     assert keys == sorted(keys)
@@ -55,7 +62,9 @@ def test_keys_sorted(dict_and_values):
 
 @given(dict_and_values=some_sorted_dicts(), data=some.data())
 def test_search_nonexisting(dict_and_values, data):
-    """Searching a key not added to sorted dictionary raises KeyError."""
+    """
+    Searching for a key not added to sorted dictionary raises a KeyError.
+    """
     sorted_dict, expected = dict_and_values
     inserted_keys = list(expected.keys())
     new_key = data.draw(some.integers())
@@ -70,7 +79,9 @@ def test_search_nonexisting(dict_and_values, data):
     data=some.data(),
 )
 def test_search_after_delete(dict_and_values, data):
-    """Searching a key after deleting the key raises KeyError."""
+    """
+    Searching for a key after deleting the same key raises a KeyError.
+    """
     sorted_dict, expected = dict_and_values
     inserted_keys = list(expected.keys())
     key_to_delete = data.draw(some.sampled_from(inserted_keys), label="Key to delete")
@@ -87,7 +98,9 @@ def test_search_after_delete(dict_and_values, data):
     dict_and_expected=some_sorted_dicts().filter(lambda drawn: len(drawn[1].keys()) > 0)
 )
 def test_minimum(dict_and_expected):
-    """Minimum key in the sorted dictionary is the smallest inserted key."""
+    """
+    Minimum key in the sorted dictionary is the smallest inserted key.
+    """
     sorted_dict, expected = dict_and_expected
 
     minimum_key = sorted_dict.min()
@@ -115,8 +128,10 @@ class StatefulDictStateMachine(RuleBasedStateMachine):
 
     @rule(key=inserted_keys)
     def search(self, key):
-        # We may have deleted the key already if it was
-        # a duplicate so check it should be there.
+        # A key inserted before may have already been
+        # deleted if it was a duplicate, so searching it
+        # may not succeed. Check the key exists in
+        # the model dictionary.
         assume(key in self.state)
         event("Searching existing key")
         assert self.sorted_dict[key] == self.state[key]

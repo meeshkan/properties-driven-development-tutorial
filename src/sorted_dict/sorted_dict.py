@@ -1,4 +1,5 @@
-"""Custom implementation of a sorted, mutable dict
+"""
+Custom implementation of a sorted, mutable dictionary
 keeping keys in sorted order and supporting
 minimum, maximum, predecessor, and successor operations.
 
