@@ -14,7 +14,7 @@ tags:
 
 > _This article was edited by [Carolyn Stransky](https://dev.to/carolstran)._
 
-Properties-driven development is the application of [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8?utm_campaign=Software%2BTesting%2BWeekly&utm_source=Software_Testing_Weekly_14) in the context of test-driven development. While coding, we constantly write tests to ensure our code is easily testable and usable. Instead of relying on hard-coded inputs and outputs in our tests, we instead write _generators of test cases_ and ensure given _properties_ hold for our code.
+Properties-driven development means the application of [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8?utm_campaign=Software%2BTesting%2BWeekly&utm_source=Software_Testing_Weekly_14) for test-driven development. While coding, we constantly write tests to ensure our code is easily testable and usable. Instead of relying on hard-coded inputs and outputs in our tests, we instead write _generators of test cases_ and ensure given _properties_ hold for our code.
 
 Thinking in terms of properties forces us to be very explicit about what our code can and cannot do. We're effectively adopting a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach, which can help in understanding the problem we're trying to solve before diving into coding.
 
@@ -49,9 +49,9 @@ This [GitHub repository](https://github.com/meeshkan/properties-driven-developme
 
 ## What is properties-driven development?
 
-Properties-driven development is essentially _test-driven development_ in the context of _property-based testing_. Test-driven development asks us to think about what our code should do and put that into a test. It's not that important whether we write our tests before, after, or during the implementation. What's important is that tests guide the development. In the context of property-based testing, those tests are formulated as _properties_.
+As mentioned above, properties-driven development is essentially _test-driven development_ with _property-based testing_. Test-driven development asks us to think about what our code should do and put that into a test. It's not that important whether we write our tests before, after, or during the implementation. What's important is that tests guide the development. In the context of property-based testing, those tests are formulated as _properties_.
 
-For example, let's say we're writing code for converting a [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) into a [JSON](https://en.wikipedia.org/wiki/JSON) array. Instead of jumping into writing a CSV parser, test-driven development asks us to first come up with test cases. 
+For example, let's say we're writing code for converting a [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) into a [JSON](https://en.wikipedia.org/wiki/JSON) array. Instead of jumping into writing a CSV parser, test-driven development asks us to first come up with test cases.
 
 Here's an example CSV input:
 
@@ -78,7 +78,7 @@ This example would make a nice unit test for our code! However, the test would h
 
 Even if we wanted to be thorough and write unit tests to cover each of those assumptions... our imaginations are limited. For example, we already forgot to mention the assumptions that the list of keys is non-empty and that there's at least one row in the CSV.
 
-Property-based tests are excellent for forcing us to be **explicit about our assumptions**. To come up with properties for our CSV-to-JSON parser, we would need to first generate CSVs we expect our parser to be able to handle. 
+Property-based tests are excellent for forcing us to be **explicit about our assumptions**. To come up with properties for our CSV-to-JSON parser, we would need to first generate CSVs we expect our parser to be able to handle.
 
 Here's the pseudocode for this type of generator:
 
@@ -102,10 +102,10 @@ For our project, we'll keep the keys sorted by storing the key-value pairs in a 
 
 > Note: Because the standard tree could be unbalanced, and therefore ineffective, you should use [`sortedcontainers`](https://github.com/grantjenks/python-sortedcontainers/) in production software.
 
-Implementing a sorted dictionary is a good example for properties-driven development for various reasons: 
+Implementing a sorted dictionary is a good example for properties-driven development for various reasons:
 
-1. It shows that property-based testing is not only for functional programming. This principle can be equally as useful for implementing a mutable dictionary. 
-1. While the implementation is straightforward, it's also complex enough to deserve good tests. Especially the deletion logic as it's more error-prone. 
+1. It shows that property-based testing is not only for functional programming. This principle can be equally as useful for implementing a mutable dictionary.
+1. While the implementation is straightforward, it's also complex enough to deserve good tests. Especially the deletion logic as it's more error-prone.
 1. Because the implementation is based on the well-known binary search tree, we can resort to the reference implementation from [Introduction to Algorithms](https://en.wikipedia.org/wiki/Introduction_to_Algorithms) textbook.
 
 For the sake of this article, we'll assume the keys are integers and that the keys themselves are used for comparison (instead of providing a custom callable per value like `SortedDict` in `sortedcontainers` does).
@@ -173,7 +173,7 @@ Now that we have an idea of what we expect our code to do, we can try to general
 1. Searching for a non-existing key raises a `KeyError`.
 1. Deleting a key and then searching for it raises a `KeyError`.
 
-These requirements will serve as the basis for our **properties**. 
+These requirements will serve as the basis for our **properties**.
 
 Next, we'll write a property for the first requirement: Being able to insert key-value pairs into the dictionary and then search for them.
 
@@ -243,7 +243,7 @@ To see what kind of data the generator creates, we can call `some_key_value_tupl
 [(-19443, b'\x16ERa'), (-425, b'')]
 ```
 
-Now that we have a generator for lists of key-value tuples, we can build a `SortedDict` instance containing those tuples. 
+Now that we have a generator for lists of key-value tuples, we can build a `SortedDict` instance containing those tuples.
 
 With Hypothesis, we can use [`hypothesis.strategies.composite`](https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.composite) to compose generators as follows:
 
@@ -352,7 +352,7 @@ class Node:
         )
 ```
 
-A `Node` has a key and a value. It also contains references to its `left` and `right` children as well as its `parent`. 
+A `Node` has a key and a value. It also contains references to its `left` and `right` children as well as its `parent`.
 
 > Note: `parent` isn't included in `__repr__` to avoid infinite loops (printing a child then prints the parent, which prints the child, which prints the parent...).
 
@@ -476,7 +476,7 @@ def test_search_after_delete(dict_and_values, data):
         sorted_dict[key_to_delete]
 ```
 
-This test first uses [`sampled_from`](https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.sampled_from) to create a generator  called `some_key`: when sampled, it randomly chooses one key from the list of inserted keys. We then use `data.draw()` to sample a key we want to delete. The `label` argument is added so that Hypothesis can print a good error message if it finds a failing test case. Once a key is drawn, we delete the key and verify that searching for it raises a `KeyError`.
+This test first uses [`sampled_from`](https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.sampled_from) to create a generator called `some_key`: when sampled, it randomly chooses one key from the list of inserted keys. We then use `data.draw()` to sample a key we want to delete. The `label` argument is added so that Hypothesis can print a good error message if it finds a failing test case. Once a key is drawn, we delete the key and verify that searching for it raises a `KeyError`.
 
 But there's a problem with our implementation: The list of inserted keys may be empty. We need to cover that case by ensuring the test only runs for non-empty dictionaries. We can do that by using [`filter`](https://hypothesis.readthedocs.io/en/latest/data.html#filtering) with our generator:
 
@@ -504,7 +504,7 @@ class SortedDict:
         return tree.delete(self._tree, key)
 ```
 
- > Note: Throughout the rest of the tutorial, `...` represents the rest of the function or class as it was previous written.
+> Note: Throughout the rest of the tutorial, `...` represents the rest of the function or class as it was previous written.
 
 Again, we delegate the deletion to the tree with the `tree.delete` function. Because the deletion is somewhat tricky but can be copied from the [Introduction to Algorithms](https://en.wikipedia.org/wiki/Introduction_to_Algorithms) book, we refer to [`tree.py`](https://github.com/meeshkan/properties-driven-development-tutorial/blob/master/src/sorted_dict/tree.py) in the accompanying repository for its implementation.
 
@@ -534,7 +534,7 @@ def test_keys_sorted(dict_and_values):
     assert keys == sorted(keys)
 ```
 
-The implementation for `sorted_dict.keys()` uses [in-order walk](https://en.wikipedia.org/wiki/Tree_traversal#In-order_(LNR)) to traverse the tree. The implementation can be found in [`sorted_dict.py`](https://github.com/meeshkan/properties-driven-development-tutorial/blob/master/src/sorted_dict/sorted_dict.py) and [`tree.py`](https://github.com/meeshkan/properties-driven-development-tutorial/blob/master/src/sorted_dict/tree.py) in the accompanying repository.
+The implementation for `sorted_dict.keys()` uses [in-order walk](<https://en.wikipedia.org/wiki/Tree_traversal#In-order_(LNR)>) to traverse the tree. The implementation can be found in [`sorted_dict.py`](https://github.com/meeshkan/properties-driven-development-tutorial/blob/master/src/sorted_dict/sorted_dict.py) and [`tree.py`](https://github.com/meeshkan/properties-driven-development-tutorial/blob/master/src/sorted_dict/tree.py) in the accompanying repository.
 
 The previous property ensures that keys are always sorted after they are inserted. But this property should also be checked after deletion. So, we should also check that the invariant holds in our earlier deletion property:
 
@@ -663,7 +663,7 @@ When `pytest` is run, it now also runs the examples from the documentation.
 
 ## Conclusion
 
-In this article, we learned how to apply property-based testing in the context of test-driven development. We also used this princple to develop a sorted dictionary. Thinking in properties instead of concrete examples can help you slow down and be precise about what your code is expected to do. 
+In this article, we learned how to apply property-based testing in the context of test-driven development. We also used this princple to develop a sorted dictionary. Thinking in properties instead of concrete examples can help you slow down and be precise about what your code is expected to do.
 
 Remember that property-based testing _doesn't replace regular unit tests_. Instead, it provides a new tool for our testing toolboxes. And sometimes, property-based testing isn't the right tool for the job. For an interesting article on when property-based testing shines, take a look at this [this article by Brujo Benavides](https://medium.com/erlang-battleground/property-based-testing-erlang-elixir-de72ad24966b).
 
@@ -676,4 +676,3 @@ Thank you for reading! As always, I'd be happy to hear your feedback.
 - [Hypothesis Quick Start guide](https://hypothesis.readthedocs.io/en/latest/quickstart.html): Get started with property-based testing with Hypothesis in Python
 - [My Take on Property-Based Testing](https://medium.com/erlang-battleground/property-based-testing-erlang-elixir-de72ad24966b): Insights on when to use property-based testing
 - [Property-Based Test-Driven Development in Elixir](https://medium.com/grandcentrix/property-based-test-driven-development-in-elixir-49cc70c7c3c4): Mathias Polligkeit's article on properties-driven development
-
