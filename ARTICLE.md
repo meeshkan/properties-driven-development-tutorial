@@ -12,15 +12,13 @@ tags:
   - python
 ---
 
-> _This article was edited by [Carolyn Stransky](https://dev.to/carolstran)._
+> _This article was edited by [Carolyn Stransky](https://dev.to/carolstran) and inspired by the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book.
 
 Properties-driven development means the application of [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8) to test-driven development. While coding, we constantly write tests to ensure our code is easily testable and usable. Instead of trying to come up with example inputs to use in our tests, we instead write _test case generators_ and ensure given _properties_ hold for our code.
 
 Thinking in terms of properties forces us to be very explicit about what our code can and cannot do. We're effectively adopting a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach, which can help in understanding the problem we're trying to solve before diving into coding.
 
-In this article, we'll learn what properties-driven development looks like. We also apply the principles to develop a module for a sorted dictionary.
-
-I recently learned about the concept from the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book, so this article is inspired by the contents of the book.
+In this article, we'll learn what properties-driven development looks like. We'll also apply these principles to develop a module for a sorted dictionary.
 
 ## What's in this tutorial
 
@@ -140,7 +138,7 @@ Like with a standard dictionary in Python, we expect re-inserting an existing ke
 'two-two'
 ```
 
-We expect searching for a non-existing key to raise a `KeyError`:
+We expect that searching for a non-existing key will raise a `KeyError`:
 
 ```python
 >>> # Non-existing key
@@ -204,13 +202,13 @@ class SortedDict:
 
 The `__setitem__` method is called when `sorted_dict[key] = item` is invoked. Similarly, `__getitem__` defines the behaviour for `sorted_dict[key]`.
 
-The skeleton above does not yet implement setting or getting the keys. Once we're done writing the test, we can run it to make sure it fails, giving us confidence our test works as expected.
+This skeleton doesn't implement setting or getting the keys yet. So once we're done writing the test, we can run it to make sure it fails. This gives us confidence our test works as expected.
 
 #### Generator
 
 We'll use the [Hypothesis](https://hypothesis.readthedocs.io/) library for writing properties for our sorted dictionary. Hypothesis supports generating [almost any kind of data](https://hypothesis.readthedocs.io/en/latest/data.html) you can imagine. It also provides decorators for writing property-based tests.
 
-To get started with writing our first property-based test, we need a generator of key-value [tuples](https://docs.python.org/3/tutorial/datastructures.html#tuples-and-sequences). The entrypoint to generators in Hypothesis is the [`hypothesis.strategies`](https://hypothesis.readthedocs.io/en/latest/data.html) module, which we alias as `some` below because it reads nicely. Strategies in Hypothesis are essentially "clever data generators" that you can compose to generate very complex data.
+To get started with writing our first property-based test, we need a generator of key-value [tuples](https://docs.python.org/3/tutorial/datastructures.html#tuples-and-sequences). The entry point to generators in Hypothesis is the [`hypothesis.strategies`](https://hypothesis.readthedocs.io/en/latest/data.html) module, which we alias as `some` below because it reads nicely. Strategies in Hypothesis are essentially "clever data generators" that you can compose to generate very complex data.
 
 Here's how to compose generators in Hypothesis to produce a list of key-value tuples:
 
@@ -258,7 +256,7 @@ def some_sorted_dicts(draw):
     return sorted_dict
 ```
 
-The `@some.composite` decorator injects the `draw` function into the decorated function definition. The `draw` function can be used to sample values from another generator. Above, we sample a list of key-value tuples from the `some_key_value_tuples()` generator and then insert those key-value pairs into our `SortedDict`. Now, `some_sorted_dicts()` is a data generator generating instances of `SortedDict`.
+The `@some.composite` decorator injects the `draw` function into the decorated function definition. The `draw` function can be used to sample values from another generator. Above, we sample a list of key-value tuples from the `some_key_value_tuples()` generator and then insert those key-value pairs into our `SortedDict`. Now `some_sorted_dicts()` is a data generator generating instances of `SortedDict`.
 
 However, there's a problem: when we get an instance of `SortedDict` from the generator, we don't know anymore what data went into creating the sorted dictionary. We therefore also return the key-value pairs from the generator, with the pairs stored in a standard Python dictionary:
 
@@ -329,7 +327,7 @@ class Tree:
         return "Tree(root={})".format(repr(self.root))
 ```
 
-The `@dataclass` decorator adds an `__init__` method for creating a tree with optional `root` argument. If the tree is empty, `root` is equal to `None`. Otherwise, it contains a `Node` defined like this:
+The `@dataclass` decorator adds, for example, an `__init__` method for creating a tree with an optional `root` argument. If the tree is empty, `root` is equal to `None`. Otherwise, it contains a `Node` defined like this:
 
 ```python
 # tree.py
@@ -442,13 +440,13 @@ Now we have implemented the first requirement with a property-based test. Let's 
 1. Searching for a non-existing key raises a `KeyError`.
 1. Deleting a key and then searching for it raises a `KeyError`.
 
-Here, we also consider our second requirement be checked as we trust Hypothesis to have generated duplicate keys. We could work on the requirement of keeping keys sorted next, but we actually want to write a test that the requirement also holds after deletions. So that's the next requirement we'll tackle: Deleting a key and then searching for it raises a `KeyError`.
+In this case, we'll also consider our second requirement implemented as we trust Hypothesis to have generated duplicate keys. We could work on the requirement of keeping keys sorted next, but we want to be sure the requirement also holds after deletions. So that's the next requirement we'll tackle: Deleting a key and then searching for it raises a `KeyError`.
 
 ### Implementing deletion
 
 The requirement states that searching for a deleted key raises a `KeyError`. But how can we put that into a property? One way is to use our `some_sorted_dicts()` generator from earlier and let Hypothesis draw one of the keys for deletion. We then delete that key and ensure searching raises a `KeyError`.
 
-To draw a key to delete, we could use `composite` again to create a composite strategy. This strategy would yield a sorted dictionary, the dictionary of expected contents, and a key to delete. However, in this case, it makes more sense to use the built-in [`data`](https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.data) strategy from Hypothesis. It comes with the `draw` method we can use to sample a value from a generator _during the test_.
+To draw a key to delete, we could use `composite` again to create a composite strategy. This strategy would yield a sorted dictionary, the dictionary of expected contents, and a key to delete. However, in this case, it makes more sense to use the built-in [`data`](https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.data) strategy from Hypothesis. This strategy comes with the `draw` method and we can use it to sample a value from a generator _during the test_.
 
 Here's how we can use `data()` to sample a key to delete from the list of inserted keys:
 
@@ -461,7 +459,7 @@ Here's how we can use `data()` to sample a key to delete from the list of insert
 )
 def test_search_after_delete(dict_and_values, data):
     """
-    Searching for a key after deleting that key raises KeyError.
+    Searching for a key after deleting that key raises a KeyError.
     """
     sorted_dict, expected = dict_and_values
     inserted_keys = list(expected.keys())
@@ -472,7 +470,7 @@ def test_search_after_delete(dict_and_values, data):
         sorted_dict[key_to_delete]
 ```
 
-This test first uses [`sampled_from`](https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.sampled_from) to create a generator called `some_key`: when sampled, it randomly chooses one key from the list of inserted keys. We then use `data.draw()` to sample a key we want to delete. The `label` argument is added so that Hypothesis can print a good error message if it finds a failing test case. Once a key is drawn, we delete the key and verify that searching for it raises a `KeyError`.
+This test first uses [`sampled_from`](https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.sampled_from) to create a generator called `some_key`. When sampled, `some_key` randomly chooses one key from the list of inserted keys. We then use `data.draw()` to sample a key that we want to delete. The `label` argument is added so that Hypothesis can print a clearer error message if it finds a failing test case. Once a key is drawn, we delete the key and verify that searching for it raises a `KeyError`.
 
 But there's a problem with our implementation: The list of inserted keys may be empty. We need to cover that case by ensuring the test only runs for non-empty dictionaries. We can do that by using [`filter`](https://hypothesis.readthedocs.io/en/latest/data.html#filtering) with our generator:
 
@@ -487,6 +485,8 @@ def test_search_after_delete(dict_and_values, data):
     ...
 ```
 
+> Note: Throughout the rest of the tutorial, `...` represents the rest of the function or class as it was previous written.
+
 The filter ensures that the dictionary is non-empty.
 
 With the property ready, we can now move on to the implementation. The delete operation in our test, `del sorted_dict[key]`, translates to `sorted_dict.__delitem__(key)`. So we need to define `__delitem__` in `SortedDict`:
@@ -500,8 +500,6 @@ class SortedDict:
         return tree.delete(self._tree, key)
 ```
 
-> Note: Throughout the rest of the tutorial, `...` represents the rest of the function or class as it was previous written.
-
 Again, we delegate the deletion to the tree with the `tree.delete` function. Because the deletion is somewhat tricky but can be copied from the [Introduction to Algorithms](https://en.wikipedia.org/wiki/Introduction_to_Algorithms) book, we refer to [`tree.py`](https://github.com/meeshkan/properties-driven-development-tutorial/blob/master/src/sorted_dict/tree.py) in the accompanying repository for its implementation.
 
 Having tackled deletion, our list of requirements now looks as following:
@@ -512,18 +510,18 @@ Having tackled deletion, our list of requirements now looks as following:
 1. Searching for a non-existing key raises a `KeyError`.
 1. ~~Deleting a key and then searching for it raises a `KeyError`~~
 
-As our last example, we'll write a property-based test for the requirement (3): that keys are always sorted. The property for requirement (4) can be found in [`test_sorted_dict.py`](https://github.com/meeshkan/properties-driven-development-tutorial/blob/master/tests/test_sorted_dict.py) in the accompanying repository.
+As our last example, we'll write a property-based test for the third requirement: Keys are always sorted. The property for final requirement (Searching for a non-existing key raises a `KeyError`) can be found in [`test_sorted_dict.py`](https://github.com/meeshkan/properties-driven-development-tutorial/blob/master/tests/test_sorted_dict.py) in the accompanying repository.
 
 ### Ensuring keys are sorted
 
-A property like "Keys are always sorted" is an invariant: Whatever operations are performed, it should remain true. Assuming `SortedDict` has `keys()` method returning the list of keys, we can write a property-based test ensuring all the instances `SortedDict` generated by `some_sorted_dicts()` have sorted keys:
+A property like "Keys are always sorted" is an invariant: Whatever operations are performed, it should remain true. Assuming `SortedDict` has a `keys()` method returning the list of keys, we can write a property-based test ensuring that all the instances of `SortedDict` generated by `some_sorted_dicts()` have sorted keys:
 
 ```python
 # test_sorted_dict.py
 @given(dict_and_values=some_sorted_dicts())
 def test_keys_sorted(dict_and_values):
     """
-    Invariant: keys in sorted dictionary are sorted.
+    Invariant: Keys in the sorted dictionary are sorted.
     """
     sorted_dict, _ = dict_and_values
     keys = sorted_dict.keys()
@@ -532,7 +530,7 @@ def test_keys_sorted(dict_and_values):
 
 The implementation for `sorted_dict.keys()` uses [in-order walk](<https://en.wikipedia.org/wiki/Tree_traversal#In-order_(LNR)>) to traverse the tree. The implementation can be found in [`sorted_dict.py`](https://github.com/meeshkan/properties-driven-development-tutorial/blob/master/src/sorted_dict/sorted_dict.py) and [`tree.py`](https://github.com/meeshkan/properties-driven-development-tutorial/blob/master/src/sorted_dict/tree.py) in the accompanying repository.
 
-The previous property ensures that keys are always sorted after they are inserted. But this property should also be checked after deletion. So, we should also check that the invariant holds in our earlier deletion property:
+The previous property ensures that keys are always sorted after they are inserted. But this property should also be checked after deletion. So, we should make sure that the invariant holds in our earlier deletion property:
 
 ```python
 # test_sorted_dict.py
@@ -551,7 +549,7 @@ While this works, there's something unsatisfactory about it. The premise of prop
 
 Enter [**stateful testing**](https://hypothesis.readthedocs.io/en/latest/stateful.html). With stateful tests, we define operations that can be run, but the framework decides the order.
 
-In Hypothesis, one can use [`RuleBasedStateMachine`](https://hypothesis.readthedocs.io/en/latest/stateful.html#rule-based-state-machines) for that. We won't go into details, but here's an example for `SortedDict`:
+With Hypothesis, we can use [`RuleBasedStateMachine`](https://hypothesis.readthedocs.io/en/latest/stateful.html#rule-based-state-machines) for that. We won't go into details, but here's an example for `SortedDict`:
 
 ```python
 # test_sorted_dict.py
@@ -620,7 +618,7 @@ Remember how we played around with the expected API of our `SortedDict` to come 
 'two'
 ```
 
-It would be great to ensure these smaller examples also hold for our implementation. Writing properties can be complex and error-prone, so it's valuable to have these human-readable examples serve as anchors. They ensure that no matter what happens, our code works as expected at least with small example inputs.
+It would be great to ensure these smaller examples also hold for our implementation. Writing properties can be complex and error-prone, so it's valuable to have these human-readable examples to serve as anchors. They ensure that no matter what happens, our code works as expected at least with small example inputs.
 
 These tests serve as documentation, which means they make excellent [doctests](https://docs.python.org/3/library/doctest.html). We can add the tests at the top of our `sorted_dict.py` module in a docstring:
 
@@ -659,9 +657,9 @@ When `pytest` is run, it now also runs the examples from the documentation. And 
 
 ## Conclusion
 
-In this article, we learned how to apply property-based testing in the context of test-driven development. We also used this princple to develop a sorted dictionary. Thinking in properties instead of concrete examples helped us be precise about what our code is expected to do.
+In this article, we learned how to apply property-based testing in the context of test-driven development. We also used this principle to develop a sorted dictionary. Thinking in terms of properties instead of concrete examples can help you slow down and be precise about what your code is expected to do. 
 
-Remember that property-based testing _doesn't replace regular unit tests_. Instead, it provides a new tool for our testing toolboxes. And sometimes, property-based testing isn't the right tool for the job. For an interesting article on when property-based testing shines, take a look at this [this article by Brujo Benavides](https://medium.com/erlang-battleground/property-based-testing-erlang-elixir-de72ad24966b). The more you write test case generators and property-based tests, the easier it becomes to use them for testing almost any kind of code.
+Remember that property-based testing _doesn't replace regular unit tests_. Instead, it provides a new tool for our testing toolboxes. And sometimes, property-based testing isn't the right tool for the job. For an interesting article on when property-based testing shines, take a look at [this article by Brujo Benavides](https://medium.com/erlang-battleground/property-based-testing-erlang-elixir-de72ad24966b). The more you write test case generators and property-based tests, the easier it becomes to use them for testing almost any kind of code.
 
 Thank you for reading! As always, I'd be happy to hear your feedback.
 
