@@ -12,7 +12,7 @@ tags:
   - python
 ---
 
-> _This article was edited by [Carolyn Stransky](https://dev.to/carolstran) and inspired by the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book.
+> \_This article was edited by [Carolyn Stransky](https://dev.to/carolstran) and inspired by the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book.
 
 Properties-driven development means the application of [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8) to test-driven development. While coding, we constantly write tests to ensure our code is easily testable and usable. Instead of trying to come up with example inputs to use in our tests, we instead write _test case generators_ and ensure given _properties_ hold for our code.
 
@@ -657,7 +657,7 @@ When `pytest` is run, it now also runs the examples from the documentation. And 
 
 ## Conclusion
 
-In this article, we learned how to apply property-based testing in the context of test-driven development. We also used this principle to develop a sorted dictionary. Thinking in terms of properties instead of concrete examples can help you slow down and be precise about what your code is expected to do. 
+In this article, we learned how to apply property-based testing in the context of test-driven development. We also used this principle to develop a sorted dictionary. Thinking in terms of properties instead of concrete examples can help you slow down and be precise about what your code is expected to do.
 
 Remember that property-based testing _doesn't replace regular unit tests_. Instead, it provides a new tool for our testing toolboxes. And sometimes, property-based testing isn't the right tool for the job. For an interesting article on when property-based testing shines, take a look at [this article by Brujo Benavides](https://medium.com/erlang-battleground/property-based-testing-erlang-elixir-de72ad24966b). The more you write test case generators and property-based tests, the easier it becomes to use them for testing almost any kind of code.
 
