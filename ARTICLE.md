@@ -14,7 +14,7 @@ tags:
 
 > _This article was edited by [Carolyn Stransky](https://dev.to/carolstran)._
 
-Properties-driven development means the application of [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8) for test-driven development. While coding, we constantly write tests to ensure our code is easily testable and usable. Instead of trying to come up with example inputs to use in our tests, we instead write _test case generators_ and ensure given _properties_ hold for our code.
+Properties-driven development means the application of [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8) to test-driven development. While coding, we constantly write tests to ensure our code is easily testable and usable. Instead of trying to come up with example inputs to use in our tests, we instead write _test case generators_ and ensure given _properties_ hold for our code.
 
 Thinking in terms of properties forces us to be very explicit about what our code can and cannot do. We're effectively adopting a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach, which can help in understanding the problem we're trying to solve before diving into coding.
 
