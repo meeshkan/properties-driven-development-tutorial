@@ -4,7 +4,7 @@
 [![](https://github.com/meeshkan/properties-driven-development-tutorial/workflows/Python/badge.svg)]()
 [![Chat on Gitter](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/meeshkan/community)
 
-This repository contains the source code for our tutorial: [Introduction to properties-driven development]().
+This repository contains the source code for our tutorial: [Introduction to properties-driven development](https://meeshkan.com/blog/introduction-to-properties-driven-development/).
 
 Most of the tests are written with [Hypothesis](https://hypothesis.readthedocs.io/en/latest/), a Python library for generative test cases.
 
