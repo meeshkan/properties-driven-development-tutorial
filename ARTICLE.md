@@ -657,7 +657,7 @@ When `pytest` is run, it now also runs the examples from the documentation. And 
 
 ## Conclusion
 
-In this article, we learned how to apply property-based testing in the context of test-driven development. We also used this principle to develop a sorted dictionary. Thinking in terms of properties instead of concrete examples can help us slow down and be precise about what our code is expected to do.
+In this article, we learned how to apply property-based testing to test-driven development. We also used this principle to develop a sorted dictionary. Thinking in terms of properties instead of concrete examples can help us slow down and be precise about what our code is expected to do.
 
 It's important to remember that property-based testing _doesn't replace regular unit tests_. Instead, it provides a new tool to our testing toolboxes. And sometimes, property-based testing isn't the right tool for the job. For an interesting article on when property-based testing shines, take a look at [this article by Brujo Benavides](https://medium.com/erlang-battleground/property-based-testing-erlang-elixir-de72ad24966b). However, the more experienced we get at writing test case generators and property-based tests, the more natural it becomes to use them for testing almost any kind of code.
 
