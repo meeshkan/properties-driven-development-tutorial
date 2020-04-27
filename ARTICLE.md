@@ -47,7 +47,7 @@ This [GitHub repository](https://github.com/meeshkan/properties-driven-developme
 
 ## What is properties-driven development?
 
-As mentioned above, properties-driven development is _test-driven development_ with _property-based tests_. Test-driven development asks us to think what our code should do and put that into a test. In the context of this article, it's not that important whether we write our tests before, after, or during the implementation. What's important is that tests guide the development. In the context of property-based testing, those tests are formulated as _properties_.
+As mentioned above, properties-driven development is _test-driven development_ with _property-based tests_. Test-driven development asks us to think what our code should do and put that into a test. In the context of this article, it's not that important whether we write our tests before, after, or during the implementation. What's important is that tests guide the development. Property-based testing asks us to formulate those tests as _properties_.
 
 For example, let's say we're writing code for converting a [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) into a [JSON](https://en.wikipedia.org/wiki/JSON) array. Instead of jumping into writing a CSV parser, test-driven development asks us to first come up with test cases.
 
