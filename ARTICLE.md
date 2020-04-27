@@ -12,11 +12,11 @@ tags:
   - python
 ---
 
-> \_This article was edited by [Carolyn Stransky](https://dev.to/carolstran) and inspired by the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book.
+> _This article was edited by [Carolyn Stransky](https://dev.to/carolstran) and inspired by the [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/) book._
 
-Properties-driven development means the application of [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8) to test-driven development. While coding, we constantly write tests to ensure our code is easily testable and usable. Instead of trying to come up with example inputs to use in our tests, we instead write _test case generators_ and ensure given _properties_ hold for our code.
+Properties-driven development means the application of [property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8) to test-driven development. Test-driven development asks us to constantly write tests to ensure our code is easily testable and usable. Property-based testing asks us to write _test case generators_ instead of hard-coded example inputs and outputs and ensure given _properties_ hold for our code.
 
-Thinking in terms of properties forces us to be very explicit about what our code can and cannot do. We're effectively adopting a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach, which can help in understanding the problem we're trying to solve before diving into coding.
+Thinking in terms of properties forces us to be very explicit about what our code can and cannot do. We're effectively adopting a [design by contract](https://en.wikipedia.org/wiki/Design_by_contract) approach, which helps us understand the problem we're trying to solve before diving into coding.
 
 In this article, we'll learn what properties-driven development looks like. We'll also apply these principles to develop a module for a sorted dictionary.
 
@@ -47,7 +47,7 @@ This [GitHub repository](https://github.com/meeshkan/properties-driven-developme
 
 ## What is properties-driven development?
 
-As mentioned above, properties-driven development is essentially _test-driven development_ with _property-based testing_. Test-driven development asks us to think about what our code should do and put that into a test. It's not that important whether we write our tests before, after, or during the implementation. What's important is that tests guide the development. In the context of property-based testing, those tests are formulated as _properties_.
+As mentioned above, properties-driven development is _property-based test-driven development_. Test-driven development asks us to think what our code should do and put that into a test. It's not that important whether we write our tests before, after, or during the implementation. What's important is that tests guide the development. In the context of property-based testing, those tests are formulated as _properties_.
 
 For example, let's say we're writing code for converting a [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) into a [JSON](https://en.wikipedia.org/wiki/JSON) array. Instead of jumping into writing a CSV parser, test-driven development asks us to first come up with test cases.
 
