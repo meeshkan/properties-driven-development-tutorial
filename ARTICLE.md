@@ -47,7 +47,7 @@ This [GitHub repository](https://github.com/meeshkan/properties-driven-developme
 
 ## What is properties-driven development?
 
-As mentioned above, properties-driven development is _property-based test-driven development_. Test-driven development asks us to think what our code should do and put that into a test. It's not that important whether we write our tests before, after, or during the implementation. What's important is that tests guide the development. In the context of property-based testing, those tests are formulated as _properties_.
+As mentioned above, properties-driven development is _test-driven development_ with _property-based tests_. Test-driven development asks us to think what our code should do and put that into a test. In the context of this article, it's not that important whether we write our tests before, after, or during the implementation. What's important is that tests guide the development. In the context of property-based testing, those tests are formulated as _properties_.
 
 For example, let's say we're writing code for converting a [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) into a [JSON](https://en.wikipedia.org/wiki/JSON) array. Instead of jumping into writing a CSV parser, test-driven development asks us to first come up with test cases.
 
@@ -657,16 +657,16 @@ When `pytest` is run, it now also runs the examples from the documentation. And 
 
 ## Conclusion
 
-In this article, we learned how to apply property-based testing in the context of test-driven development. We also used this principle to develop a sorted dictionary. Thinking in terms of properties instead of concrete examples can help you slow down and be precise about what your code is expected to do.
+In this article, we learned how to apply property-based testing in the context of test-driven development. We also used this principle to develop a sorted dictionary. Thinking in terms of properties instead of concrete examples can help us slow down and be precise about what our code is expected to do.
 
-Remember that property-based testing _doesn't replace regular unit tests_. Instead, it provides a new tool for our testing toolboxes. And sometimes, property-based testing isn't the right tool for the job. For an interesting article on when property-based testing shines, take a look at [this article by Brujo Benavides](https://medium.com/erlang-battleground/property-based-testing-erlang-elixir-de72ad24966b). The more you write test case generators and property-based tests, the easier it becomes to use them for testing almost any kind of code.
+It's important to remember that property-based testing _doesn't replace regular unit tests_. Instead, it provides a new tool to our testing toolboxes. And sometimes, property-based testing isn't the right tool for the job. For an interesting article on when property-based testing shines, take a look at [this article by Brujo Benavides](https://medium.com/erlang-battleground/property-based-testing-erlang-elixir-de72ad24966b). However, the more experienced we get at writing test case generators and property-based tests, the more natural it becomes to use them for testing almost any kind of code.
 
-Thank you for reading! As always, I'd be happy to hear your feedback.
+Thank you for reading! As always, we're happy to hear your feedback.
 
 ## Additional resources
 
 - [Property-Based Testing with PropEr, Erlang, and Elixir](https://propertesting.com/): Excellent book on property-based testing with a chapter on properties-driven development
-- [From 1 to 10,000 test cases in under an hour: A beginner's guide to property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8): Guide to PBT from my colleagues Carolyn and Fredrik
+- [From 1 to 10,000 test cases in under an hour: A beginner's guide to property-based testing](https://dev.to/meeshkan/from-1-to-10-000-test-cases-in-under-an-hour-a-beginner-s-guide-to-property-based-testing-1jf8): Guide to PBT from my colleagues [Carolyn](https://dev.to/carolstran) and [Fredrik](https://dev.to/fornwall)
 - [Hypothesis Quick Start guide](https://hypothesis.readthedocs.io/en/latest/quickstart.html): Get started with property-based testing with Hypothesis in Python
 - [My Take on Property-Based Testing](https://medium.com/erlang-battleground/property-based-testing-erlang-elixir-de72ad24966b): Insights on when to use property-based testing
 - [Property-Based Test-Driven Development in Elixir](https://medium.com/grandcentrix/property-based-test-driven-development-in-elixir-49cc70c7c3c4): Mathias Polligkeit's article on properties-driven development
